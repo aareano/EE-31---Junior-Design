@@ -145,10 +145,10 @@ void loop() {
   // ** UPDATE THE CURRENT STATE (if necessary) ** //
   
   // check for collision
-  pull_bumpers();
+  // pull_bumpers();
 
   // handle collision
-  service_collisions();
+  // service_collisions();
 
   // check hall effect sensor(s)
   
@@ -157,20 +157,20 @@ void loop() {
   // check color sensor(s)
   currentColor = detectColor();
   
-//  Serial.print("currentColor: ");
-//  Serial.println(currentColor);
+ Serial.print("currentColor: ");
+ Serial.println(currentColor);
   
-//  switch (currentColor) {
-//    case BLUE:
-//      forward();
-//      break;
-//    case RED:
-//      reverse();
-//      break;
-//    case BLACK:
-//      turnRightInPlace();
-//      break;
-//  }
+ switch (currentColor) {
+   case BLUE:
+     forward();
+     break;
+   case RED:
+     reverse();
+     break;
+   case BLACK:
+     turnRightInPlace();
+     break;
+ }
 
 
   // ** EXECUTE THE CURRENT STATE ** //
@@ -186,7 +186,6 @@ void loop() {
   
   // ** EXECUTE STATE-INDEPENDENT ACTIONS (I can't think of any) ** //
 
-  delay(12000);
   Serial.println("------------------------");
 }
 
@@ -414,7 +413,7 @@ void service_BL_BR() {
 
 Color detectColor() {
   // outer if-statement for optimization
-  //   - if it's on blue, it's most likely that it will detect blue again
+  //   - if it's on blue, it's most likely that it will detect blue again, so check for blue first
   //   - likewise for red
   if (currentColor == BLUE) {
     if (detectBlue()) {         // look for blue first
