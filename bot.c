@@ -11,40 +11,45 @@
 //      --------------------
 // *************************** //
 
-// pin declarations for motor control pins
+// Motion control
+// motor speed is a euphemisms for duty cycle, the sign indicates the spin direction
+// both speeds @ 100 >> foward at full speed
+int rightMotorSpeed = 0;  // varies from -100 to 100
+int leftMotorSpeed = 0;   // varies from -100 to 100
+
+// pins
 int GATE1 = 3;
 int GATE2 = 5;
 int GATE3 = 6;
 int GATE4 = 9;
 
-// pin declaration for leds and the optic sensor
-// outputs
+enum MotorName { LEFT, RIGHT };
+
+// optic sensor
 int RED_LED_1 = 52;
 int RED_LED_2 = 53;
 int BLUE_LED = 22;
 
-// inputs
-int RED_LED_1_LEVEL = 4;
-int RED_LED_2_LEVEL = 5;
-int BLUE_LED_LEVEL = 6;
 int LED_SENSOR_LEVEL = 7;
 
 // Maximum voltage readings for that color (with the appropriate LED lit)
 float BLUE_THRESHOLD = 3.8; //3.3; // commented thresholds work for when sensor is flat on the ground
 float RED_THRESHOLD = 4.6; //4.4;  // current thresholds work for when sensor is sliiiightly above the ground
 
-// motor speed is a euphemisms for duty cycle, the sign indicates the spin direction
-// both speeds @ 100 >> foward at full speed
-int rightMotorSpeed = 0;  // varies from -100 to 100
-int leftMotorSpeed = 0;   // varies from -100 to 100
-
-enum MotorName { LEFT, RIGHT };
-
 // represents the color the bot has most recently detected
 enum Color { BLACK, BLUE, RED };
-Color currentColor;
+Color CurrentColor;
 
-// collision detection
+// Hall effect sensor
+int H_SENSOR = A0;
+int H_LED = 32;
+
+int H_THRESHOLD = 0.5; // the voltage needs to drop below this level for the mine to be registered
+
+enum Mine { NONE, FOUND };
+Mine MineState;
+
+// Collision Detection
 bool CD_enabled = true;
 const int BumperCount = 5;
 const int DoubleBumperCount = 3;
@@ -111,10 +116,10 @@ void setup() {
   pinMode(RED_LED_2, OUTPUT);
   pinMode(BLUE_LED, OUTPUT);
   
-  pinMode(RED_LED_1_LEVEL, INPUT);
-  pinMode(RED_LED_2_LEVEL, INPUT);
-  pinMode(BLUE_LED_LEVEL, INPUT);
   pinMode(LED_SENSOR_LEVEL, INPUT);
+
+  pinMode(H_SENSOR, INPUT);
+  pinMode(H_LED, OUTPUT);
 
   pinMode(FL.pin, OUTPUT);
   pinMode(FC.pin, OUTPUT);
@@ -134,7 +139,8 @@ void setup() {
   pinMode(BR.ledPin, OUTPUT);
 
   // set initial state
-  currentColor = BLACK;
+  CurrentColor = BLACK;
+  MineState = NONE;
   halt();
 }
 
@@ -145,36 +151,39 @@ void loop() {
   // ** UPDATE THE CURRENT STATE (if necessary) ** //
   
   // check for collision
-  // pull_bumpers();
+  pull_bumpers();
 
   // handle collision
-  // service_collisions();
+  service_collisions();
 
-  // check hall effect sensor(s)
+  // check hall effect sensor
+  pull_h_sensor();
   
   // check sound reciever(s)
     
-  // check color sensor(s)
-  currentColor = detectColor();
+  // check color sensor
+  CurrentColor = detectColor();
   
- Serial.print("currentColor: ");
- Serial.println(currentColor);
+//  Serial.print("CurrentColor: ");
+//  Serial.println(CurrentColor);
   
- switch (currentColor) {
-   case BLUE:
-     forward();
-     break;
-   case RED:
-     reverse();
-     break;
-   case BLACK:
-     turnRightInPlace();
-     break;
- }
+//  switch (CurrentColor) {
+//    case BLUE:
+//      forward();
+//      break;
+//    case RED:
+//      reverse();
+//      break;
+//    case BLACK:
+//      turnRightInPlace();
+//      break;
+//  }
 
 
   // ** EXECUTE THE CURRENT STATE ** //
   
+  // execute mine state
+  service_mine();
 
   // execute driving
   drive();  
@@ -186,6 +195,7 @@ void loop() {
   
   // ** EXECUTE STATE-INDEPENDENT ACTIONS (I can't think of any) ** //
 
+  delay(500);
   Serial.println("------------------------");
 }
 
@@ -198,9 +208,9 @@ void pull_bumpers() {
     if ((millis() - Bumpers[i].lastDebounceTime) > BumperDebounceDelay) {
       Bumpers[i].pinState = digitalRead(Bumpers[i].pin) == HIGH ? true : false;
       
-      Serial.print(Bumpers[i].name);
-      Serial.print(" >> ");
-      Serial.println((int) Bumpers[i].pinState);
+//      Serial.print(Bumpers[i].name);
+//      Serial.print(" >> ");
+//      Serial.println((int) Bumpers[i].pinState);
     }
   }
 }
@@ -222,8 +232,8 @@ void service_collisions() {
         Bumpers[i].state = DOWN;              // you hit a wall after not being on a wall.
       }
     } else {                // bumper is not depressed
-      Serial.print(Bumpers[i].name);
-      Serial.println(" is NOT pressed");
+//      Serial.print(Bumpers[i].name);
+//      Serial.println(" is NOT pressed");
 
       // bumper.state == UP           - do nothing
       // bumper.state == DOWN         - should never happen here
@@ -235,27 +245,27 @@ void service_collisions() {
       }
     }
 
-    Serial.print("Updated state of ");
-    Serial.print(Bumpers[i].name);
-    Serial.print(" :: ");
-    Serial.println(Bumpers[i].state);
+//    Serial.print("Updated state of ");
+//    Serial.print(Bumpers[i].name);
+//    Serial.print(" :: ");
+//    Serial.println(Bumpers[i].state);
   }
 
   // if two adjacent bumpers are down, service the collision with a double bumper
   if ((FL.state == DOWN || FL.state == DOWN_SERVICING) && (FC.state == DOWN || FC.state == DOWN_SERVICING)) {
     FL_FC.state = SERVICING;
-    Serial.print(FL_FC.name);
-    Serial.println(" >> SERVICING");
+//    Serial.print(FL_FC.name);
+//    Serial.println(" >> SERVICING");
   }
   if ((FC.state == DOWN || FC.state == DOWN_SERVICING) && (FR.state == DOWN || FR.state == DOWN_SERVICING)) {
     FC_FR.state = SERVICING;
-    Serial.print(FC_FR.name);
-    Serial.println(" >> SERVICING");
+//    Serial.print(FC_FR.name);
+//    Serial.println(" >> SERVICING");
   }
   if ((BL.state == DOWN || BL.state == DOWN_SERVICING) && (BR.state == DOWN || BR.state == DOWN_SERVICING)) {
     BL_BR.state = SERVICING;
-    Serial.print(BL_BR.name);
-    Serial.println(" >> SERVICING");
+//    Serial.print(BL_BR.name);
+//    Serial.println(" >> SERVICING");
   }
 
   // service single bumpers
@@ -408,14 +418,33 @@ void service_BL_BR() {
   }
 }
 
+// ******************* HALL EFFECT SENSOR CONTROL ******************* //
 
-// ******************* SENSOR CONTROL ******************* //
+void pull_h_sensor() {
+  float reading = calcVolts(analogRead(H_SENSOR));
+//  Serial.print("pulling sensor: ");
+//  Serial.println(reading);
+  if (reading < H_THRESHOLD) {
+//    Serial.println("found mine");
+    MineState = FOUND;
+  }
+}
+
+void service_mine() {
+  if (MineState == FOUND) {
+    digitalWrite(H_LED, HIGH);
+  } else {
+    digitalWrite(H_LED, LOW);
+  }
+}
+
+// ******************* COLOR SENSOR CONTROL ******************* //
 
 Color detectColor() {
   // outer if-statement for optimization
-  //   - if it's on blue, it's most likely that it will detect blue again, so check for blue first
+  //   - if it's on blue, it's most likely that it will detect blue again
   //   - likewise for red
-  if (currentColor == BLUE) {
+  if (CurrentColor == BLUE) {
     if (detectBlue()) {         // look for blue first
       return BLUE;
     } else if (detectRed()) {
@@ -602,4 +631,3 @@ int roundPWM(int PWM, int localMin, int localMax) {
   }
   return PWM;
 }
-
