@@ -26,11 +26,11 @@ int GATE4 = 9;
 enum MotorName { LEFT, RIGHT };
 
 // optic sensor
+int BLUE_LED = 51;
 int RED_LED_1 = 52;
 int RED_LED_2 = 53;
-int BLUE_LED = 22;
 
-int LED_SENSOR_LEVEL = 7;
+int LED_SENSOR_LEVEL = A1;
 
 // Maximum voltage readings for that color (with the appropriate LED lit)
 float BLUE_THRESHOLD = 3.8; //3.3; // commented thresholds work for when sensor is flat on the ground
@@ -38,13 +38,13 @@ float RED_THRESHOLD = 4.6; //4.4;  // current thresholds work for when sensor is
 
 // represents the color the bot has most recently detected
 enum Color { BLACK, BLUE, RED };
-Color CurrentColor;
+Color ColorState;
 
 // Hall effect sensor
 int H_SENSOR = A0;
 int H_LED = 32;
 
-int H_THRESHOLD = 0.5; // the voltage needs to drop below this level for the mine to be registered
+float H_THRESHOLD = 0.5; // the voltage needs to drop below this level for the mine to be registered
 
 enum Mine { NONE, FOUND };
 Mine MineState;
@@ -139,7 +139,7 @@ void setup() {
   pinMode(BR.ledPin, OUTPUT);
 
   // set initial state
-  CurrentColor = BLACK;
+  ColorState = BLACK;
   MineState = NONE;
   halt();
 }
@@ -162,12 +162,9 @@ void loop() {
   // check sound reciever(s)
     
   // check color sensor
-  CurrentColor = detectColor();
+  detect_color();
   
-//  Serial.print("CurrentColor: ");
-//  Serial.println(CurrentColor);
-  
-//  switch (CurrentColor) {
+//  switch (ColorState) {
 //    case BLUE:
 //      forward();
 //      break;
@@ -195,7 +192,6 @@ void loop() {
   
   // ** EXECUTE STATE-INDEPENDENT ACTIONS (I can't think of any) ** //
 
-  delay(500);
   Serial.println("------------------------");
 }
 
@@ -422,48 +418,53 @@ void service_BL_BR() {
 
 void pull_h_sensor() {
   float reading = calcVolts(analogRead(H_SENSOR));
-//  Serial.print("pulling sensor: ");
-//  Serial.println(reading);
+  Serial.print("pulling sensor: ");
+  Serial.println(reading);
   if (reading < H_THRESHOLD) {
-//    Serial.println("found mine");
+    Serial.println("found mine");
     MineState = FOUND;
+  } else {
+    MineState = NONE;
   }
 }
 
 void service_mine() {
   if (MineState == FOUND) {
     digitalWrite(H_LED, HIGH);
-  } else {
+  } else if (MineState == NONE) {
     digitalWrite(H_LED, LOW);
   }
 }
 
 // ******************* COLOR SENSOR CONTROL ******************* //
 
-Color detectColor() {
+void detect_color() {
   // outer if-statement for optimization
   //   - if it's on blue, it's most likely that it will detect blue again
   //   - likewise for red
-  if (CurrentColor == BLUE) {
-    if (detectBlue()) {         // look for blue first
-      return BLUE;
-    } else if (detectRed()) {
-      return RED;
+  if (ColorState == BLUE) {
+    if (detect_blue()) {         // look for blue first
+      ColorState = BLUE;
+    } else if (detect_red()) {
+      ColorState = RED;
     } else {
-      return BLACK;
+      ColorState = BLACK;
     }
   } else  {
-    if (detectRed()) {          // look for red first
-      return RED;
-    } else if (detectBlue()) {
-      return BLUE;
+    if (detect_red()) {          // look for red first
+      ColorState = RED;
+    } else if (detect_blue()) {
+      ColorState = BLUE;
     } else {
-      return BLACK;
+      ColorState = BLACK;
     }
   }
+  
+  Serial.print("ColorState: ");
+  Serial.println(ColorState);
 }
 
-bool detectBlue() {
+bool detect_blue() {
   // illuminate blue LED
   digitalWrite(BLUE_LED, HIGH);
   delay(1);
@@ -480,7 +481,7 @@ bool detectBlue() {
   return calcVolts(reading) < BLUE_THRESHOLD;
 }
 
-bool detectRed() {
+bool detect_red() {
   // illuminate red LED
   digitalWrite(RED_LED_1, HIGH);
   digitalWrite(RED_LED_2, HIGH);
