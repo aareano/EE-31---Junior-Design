@@ -167,11 +167,35 @@ void loop() {
   
   switch (ColorState) {
     case BLUE:
-     halt();
+      Serial.println("BLUE");
+      Serial.println("LAST COLOR STATE");
+      Serial.println(LAST_STATE);
+     if(LAST_STATE == BLACK){
+      Serial.println("Turn Direction just after turn:");
+      Serial.println(TurnDirection);
+      TurnDirection = !TurnDirection;
+      Serial.println("Turn Direction changed to");
+      Serial.println(TurnDirection);
+     }
+     forward_slow();
      break;
-    default:
-     forward_slow(); 
-     break;
+    case RED:
+    Serial.print("RED");
+//      reverse();
+      break;
+    case BLACK:
+      Serial.print("BLACK");
+      Serial.print("TurnDirection");
+      Serial.println(TurnDirection);
+      switch(TurnDirection){
+        case 0:
+          turnLeftInPlace();
+          break;
+        case 1: 
+          turnRightInPlace();
+          break;
+      }
+    break;
   }
  LAST_STATE = ColorState;
 
