@@ -1,12 +1,13 @@
 
+
 // *************************** //
 //      --------------------
 //            |            |
-//             / GATE1       / GATE3
-// The        |            |
-// H-Bridge   --------------
-// schematic  |            |
-//             / GATE2       / GATE4
+//             \ GATE2      \ GATE3
+// The        | |          | |
+// H-Bridge   | |          | |
+// schematic  | |          | |
+//             / GATE1      / GATE4
 //            |            |
 //      --------------------
 // *************************** //
@@ -18,27 +19,40 @@ int rightMotorSpeed = 0;  // varies from -100 to 100
 int leftMotorSpeed = 0;   // varies from -100 to 100
 
 // pins
-int GATE1 = 3;
-int GATE2 = 5;
-int GATE3 = 6;
-int GATE4 = 9;
+int GATE1 = 3;  // red
+int GATE2 = 5;  // brown
+int GATE3 = 6;  // orange
+int GATE4 = 9;  // yellow
 
 enum MotorName { LEFT, RIGHT };
 
 // optic sensor
 int BLUE_LED = 51;
-int RED_LED_1 = 52;
-int RED_LED_2 = 53;
 
 int LED_SENSOR_LEVEL = A1;
 
 // Maximum voltage readings for that color (with the appropriate LED lit)
-float BLUE_THRESHOLD = 3.8; //3.3; // commented thresholds work for when sensor is flat on the ground
-float RED_THRESHOLD = 4.6; //4.4;  // current thresholds work for when sensor is sliiiightly above the ground
+float BLUE_THRESHOLD = 4.6;
+float RED_THRESHOLD = 4.9;
 
 // represents the color the bot has most recently detected
 enum Color { BLACK, BLUE, RED };
 Color ColorState;
+
+// Line Following
+enum Path { PATH_FINDING, SEARCHING_FIRST_SIDE, SEARCHING_SECOND_SIDE, ON_PATH };
+enum Side { SEARCHING_LEFT, SEARCHING_RIGHT };
+Color PathToFollow;
+Side SearchSide;
+Path PathState;
+long BaseSearchTime = 200;
+long SearchTime = 200;      // this is how long to search for the line on the left or right when we get off of it
+long MinSearchTime = 75;   // the bot needs to turn at least this much before it starts checking for the path again
+long SearchStartTime = 0;   // this will be edited when we start searching for the line when we get off of it
+
+enum TurnDirection {L, R};
+bool TurnDirection = L;
+Color LAST_STATE = BLUE;
 
 // Hall effect sensor
 int H_SENSOR = A0;
@@ -112,8 +126,6 @@ void setup() {
   pinMode(GATE3, OUTPUT);
   pinMode(GATE4, OUTPUT);
 
-  pinMode(RED_LED_1, OUTPUT);
-  pinMode(RED_LED_2, OUTPUT);
   pinMode(BLUE_LED, OUTPUT);
   
   pinMode(LED_SENSOR_LEVEL, INPUT);
@@ -141,6 +153,10 @@ void setup() {
   // set initial state
   ColorState = BLACK;
   MineState = NONE;
+  
+  PathState = PATH_FINDING;
+  SearchSide = SEARCHING_LEFT;  
+  PathToFollow = BLUE;
   halt();
 }
 
@@ -164,18 +180,8 @@ void loop() {
   // check color sensor
   detect_color();
   
-//  switch (ColorState) {
-//    case BLUE:
-//      forward();
-//      break;
-//    case RED:
-//      reverse();
-//      break;
-//    case BLACK:
-//      turnRightInPlace();
-//      break;
-//  }
-
+  // path following
+  follow_path(PathToFollow);
 
   // ** EXECUTE THE CURRENT STATE ** //
   
@@ -191,8 +197,76 @@ void loop() {
     
   
   // ** EXECUTE STATE-INDEPENDENT ACTIONS (I can't think of any) ** //
-
+  
   Serial.println("------------------------");
+}
+
+// ******************* PATH FOLLOWING ******************* //
+
+void follow_path(Color pathColor) {
+
+  switch (PathState) {
+    case PATH_FINDING:
+      Serial.println("path finding...");
+      if (ColorState == pathColor) {
+        PathState = ON_PATH;
+      }
+      forward_slow();
+      break;
+    case ON_PATH:
+      Serial.print("on path!");
+      if (ColorState != pathColor) { // we've just moved off the path
+        PathState = SEARCHING_FIRST_SIDE;
+        SearchStartTime = millis();
+      }
+      SearchTime = BaseSearchTime;  // reset the search radius
+      forward_slow();
+      break;
+    case SEARCHING_FIRST_SIDE:
+      Serial.print("searching first side - ");
+      Serial.println(SearchSide == SEARCHING_LEFT ? "SEARCHING_LEFT" : "SEARCHING_RIGHT");
+
+      if ((millis() - SearchStartTime > MinSearchTime) && ColorState == pathColor) {
+        Serial.println("checking for path!!!!!!!!!!!");
+        PathState = ON_PATH; // check at the end search time
+      }
+      
+      if (millis() - SearchStartTime > SearchTime) { // search time expired
+        
+        PathState = SEARCHING_SECOND_SIDE;
+        SearchSide = SearchSide == SEARCHING_LEFT ? SEARCHING_RIGHT : SEARCHING_LEFT; // flip the search side
+        SearchStartTime = millis();
+      } else {
+        if (SearchSide == SEARCHING_LEFT) {
+          turnLeftInPlace();
+        } else {
+          turnRightInPlace();
+        }
+      }
+      break;
+    case SEARCHING_SECOND_SIDE:
+      Serial.print("searching second side - ");
+      Serial.println(SearchSide == SEARCHING_LEFT ? "SEARCHING_LEFT" : "SEARCHING_RIGHT");
+
+      if ((millis() - SearchStartTime > MinSearchTime) && ColorState == pathColor) {
+        PathState = ON_PATH; // check at the end search time
+      }
+      
+      if (millis() - SearchStartTime > (2 * SearchTime)) { // search time expired
+
+        SearchTime *= 1.5;  // increase the radius by a factor of 1.5
+        PathState = SEARCHING_FIRST_SIDE;
+        SearchSide = SearchSide == SEARCHING_LEFT ? SEARCHING_RIGHT : SEARCHING_LEFT; // flip the search side
+        SearchStartTime = millis();
+      } else {
+        if (SearchSide == SEARCHING_LEFT) {
+          turnLeftInPlace();
+        } else {
+          turnRightInPlace();
+        }
+      }
+      break;
+  }
 }
 
 // ******************* COLLISION CONTROL ******************* //
@@ -418,8 +492,8 @@ void service_BL_BR() {
 
 void pull_h_sensor() {
   float reading = calcVolts(analogRead(H_SENSOR));
-  Serial.print("pulling sensor: ");
-  Serial.println(reading);
+//  Serial.print("pulling H sensor: ");
+//  Serial.println(reading);
   if (reading < H_THRESHOLD) {
     Serial.println("found mine");
     MineState = FOUND;
@@ -439,65 +513,29 @@ void service_mine() {
 // ******************* COLOR SENSOR CONTROL ******************* //
 
 void detect_color() {
-  // outer if-statement for optimization
-  //   - if it's on blue, it's most likely that it will detect blue again
-  //   - likewise for red
-  if (ColorState == BLUE) {
-    if (detect_blue()) {         // look for blue first
-      ColorState = BLUE;
-    } else if (detect_red()) {
-      ColorState = RED;
-    } else {
-      ColorState = BLACK;
-    }
-  } else  {
-    if (detect_red()) {          // look for red first
-      ColorState = RED;
-    } else if (detect_blue()) {
-      ColorState = BLUE;
-    } else {
-      ColorState = BLACK;
-    }
-  }
-  
-  Serial.print("ColorState: ");
-  Serial.println(ColorState);
-}
-
-bool detect_blue() {
   // illuminate blue LED
   digitalWrite(BLUE_LED, HIGH);
   delay(1);
 
   // check the sensor
-  int reading = analogRead(LED_SENSOR_LEVEL);
+  float reading = analogRead(LED_SENSOR_LEVEL);
   
   // turn off blue LED
   digitalWrite(BLUE_LED, LOW);
 
-//  Serial.print("blue reading: ");
-//  Serial.println(calcVolts(reading));
+  Serial.print("reading: ");
+  Serial.println(calcVolts(reading));
   
-  return calcVolts(reading) < BLUE_THRESHOLD;
-}
-
-bool detect_red() {
-  // illuminate red LED
-  digitalWrite(RED_LED_1, HIGH);
-  digitalWrite(RED_LED_2, HIGH);
-  delay(1);
-
-  // check the sensor
-  int reading = analogRead(LED_SENSOR_LEVEL);
+  if (calcVolts(reading) < BLUE_THRESHOLD) {
+    ColorState = BLUE;
+  } else if (calcVolts(reading) < RED_THRESHOLD) {
+    ColorState = RED;
+  } else { // BLACK
+    ColorState = BLACK;
+  }
   
-  // turn off red LED
-  digitalWrite(RED_LED_1, LOW);
-  digitalWrite(RED_LED_2, LOW);
-
-//  Serial.print("red reading: ");
-//  Serial.println(calcVolts(reading));
-  
-  return calcVolts(reading) < RED_THRESHOLD;
+  Serial.print("ColorState: ");
+  Serial.println(ColorState);
 }
 
 // scales 0-1023 to 0-5
@@ -553,8 +591,8 @@ void turnRight() {
 }
 
 void turnRightInPlace() {
-  rightMotorSpeed = -50;
-  leftMotorSpeed = 50;
+  rightMotorSpeed = -35;
+  leftMotorSpeed = 35;
 }
 
 void turnLeft() {
@@ -563,8 +601,8 @@ void turnLeft() {
 }
 
 void turnLeftInPlace() {
-  rightMotorSpeed = 50;
-  leftMotorSpeed = -50;  
+  rightMotorSpeed = 35;
+  leftMotorSpeed = -35;  
 }
 
 // add more convenience functions as needed
@@ -577,7 +615,7 @@ void turnMotor(MotorName mName, int highPin, int lowPin, float dutyCycle) {
   int lowPWM = 0;
   
   if (mName == RIGHT) {
-    int offset = 0;
+    int offset = 7;
     highPWM = calcPWM(roundPWM(dutyCycle + offset, 15, 85));
   } else {
     int offset = 0;
