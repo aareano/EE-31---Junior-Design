@@ -160,44 +160,45 @@ void loop() {
   // check hall effect sensor
   pull_h_sensor();
   
+  if()
   // check sound reciever(s)
     
   // check color sensor
   detect_color();
   
-  switch (ColorState) {
-    case BLUE:
-      Serial.println("BLUE");
-      Serial.println("LAST COLOR STATE");
-      Serial.println(LAST_STATE);
-     if(LAST_STATE == BLACK){
-      Serial.println("Turn Direction just after turn:");
-      Serial.println(TurnDirection);
-      TurnDirection = !TurnDirection;
-      Serial.println("Turn Direction changed to");
-      Serial.println(TurnDirection);
-     }
-     forward_slow();
-     break;
-    case RED:
-    Serial.print("RED");
-//      reverse();
-      break;
-    case BLACK:
-      Serial.print("BLACK");
-      Serial.print("TurnDirection");
-      Serial.println(TurnDirection);
-      switch(TurnDirection){
-        case 0:
-          turnLeftInPlace();
-          break;
-        case 1: 
-          turnRightInPlace();
-          break;
-      }
-    break;
-  }
- LAST_STATE = ColorState;
+//   switch (ColorState) {
+//     case BLUE:
+//       Serial.println("BLUE");
+//       Serial.println("LAST COLOR STATE");
+//       Serial.println(LAST_STATE);
+//      if(LAST_STATE == BLACK){
+//       Serial.println("Turn Direction just after turn:");
+//       Serial.println(TurnDirection);
+//       TurnDirection = !TurnDirection;
+//       Serial.println("Turn Direction changed to");
+//       Serial.println(TurnDirection);
+//      }
+//      forward_slow();
+//      break;
+//     case RED:
+//     Serial.print("RED");
+// //      reverse();
+//       break;
+//     case BLACK:
+//       Serial.print("BLACK");
+//       Serial.print("TurnDirection");
+//       Serial.println(TurnDirection);
+//       switch(TurnDirection){
+//         case 0:
+//           turnLeftInPlace();
+//           break;
+//         case 1: 
+//           turnRightInPlace();
+//           break;
+//       }
+//     break;
+//   }
+//  LAST_STATE = ColorState;
 
   // ** EXECUTE THE CURRENT STATE ** //
   
