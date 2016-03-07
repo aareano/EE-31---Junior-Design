@@ -1,3 +1,17 @@
+
+
+// *************************** //
+//      --------------------
+//            |            |
+//             \ GATE2      \ GATE3
+// The        | |          | |
+// H-Bridge   | |          | |
+// schematic  | |          | |
+//             / GATE1      / GATE4
+//            |            |
+//      --------------------
+// *************************** //
+
 // Motion control
 // motor speed is a euphemisms for duty cycle, the sign indicates the spin direction
 // both speeds @ 100 >> foward at full speed
@@ -186,3 +200,7 @@ void loop() {
   
   Serial.println("------------------------");
 }
+
+
+
+
