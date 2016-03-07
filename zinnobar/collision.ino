@@ -78,7 +78,7 @@ void updateStates() {
   // update bumper states based on switch levels (pin states)
   for(int i = 0; i < BumperCount; i++) {     
 
-    Serial.print(Bumpers[i]->name);
+//    Serial.print(Bumpers[i]->name);
 
     switch (Bumpers[i]->state) {
       case UP:
@@ -87,26 +87,27 @@ void updateStates() {
           Bumpers[i]->state = DOWN;
           Bumpers[i]->timeTriggered = millis();
 
-          Serial.println(" >> DOWN");
+//          Serial.println(" >> DOWN");
         } else {
           // stay in this state
-          Serial.println(" >> stay in UP");
+//          Serial.println(" >> stay in UP");
         }
         break;
       case DOWN:
         // this case should never happen
+        Serial.print(Bumpers[i]->name);
         Serial.println(" - *** ERROR IN BUMPER STATE TRANSITIONS ***");
         break;
       case DOWN_SERVICING:
         if (Bumpers[i]->pinState == HIGH) {
           // stay in this state
 
-          Serial.println(" >> stay in DOWN_SERVICING");
+//          Serial.println(" >> stay in DOWN_SERVICING");
         } else {
           // we've moved off of the wall
           Bumpers[i]->state == UP_SERVICING;     
           
-          Serial.println(" >> UP_SERVICING");
+//          Serial.println(" >> UP_SERVICING");
         }
         break;
       case UP_SERVICING:
@@ -114,11 +115,11 @@ void updateStates() {
           // you hit a wall after not being on a wall.
           Bumpers[i]->state = DOWN;
 
-          Serial.println(" >> DOWN");
+//          Serial.println(" >> DOWN");
         } else {
           // stay in this state
 
-          Serial.println(" >> stay in UP_SERVICING");
+//          Serial.println(" >> stay in UP_SERVICING");
         }
         break;
     }
@@ -127,24 +128,24 @@ void updateStates() {
   // if two adjacent bumpers are down, service the collision with a double bumper instead of the single bumpers
   if ((FL->state == DOWN || FL->state == DOWN_SERVICING) && (FC->state == DOWN || FC->state == DOWN_SERVICING)) {
     FL_FC->state = SERVICING;
-    Serial.print(FL_FC->name);
-    Serial.println(" >> SERVICING");
+//    Serial.print(FL_FC->name);
+//    Serial.println(" >> SERVICING");
   }
   if ((FC->state == DOWN || FC->state == DOWN_SERVICING) && (FR->state == DOWN || FR->state == DOWN_SERVICING)) {
     FC_FR->state = SERVICING;
-    Serial.print(FC_FR->name);
-    Serial.println(" >> SERVICING");
+//    Serial.print(FC_FR->name);
+//    Serial.println(" >> SERVICING");
   }
   if ((BL->state == DOWN || BL->state == DOWN_SERVICING) && (BR->state == DOWN || BR->state == DOWN_SERVICING)) {
     BL_BR->state = SERVICING;
-    Serial.print(BL_BR->name);
-    Serial.println(" >> SERVICING");
+//    Serial.print(BL_BR->name);
+//    Serial.println(" >> SERVICING");
   }
 }
 
 // interrupts to update the time of the last voltage change on each switch
 void FL_bumper_event() {
-  Serial.println("FL bounced");
+//  Serial.println("FL bounced");
   FL->lastDebounceTime = millis();
 }
 
@@ -169,13 +170,13 @@ void service_FL() {
   
   // if the service time hasn't expired, service here
   if (millis() < FL->timeTriggered + FL->serviceTime) {
-    Serial.println("Servcing FL");
+//    Serial.println("Servcing FL");
     
     digitalWrite(FL->ledPin, HIGH);
   
   // the service is done. change states.
   } else {
-    Serial.println("Service time for FL is expried");
+//    Serial.println("Service time for FL is expried");
 
     digitalWrite(FL->ledPin, LOW);
     FL->state = UP;
@@ -229,11 +230,11 @@ void service_FL_FC() {
   long timeTriggered = FL->timeTriggered > FC->timeTriggered ? FL->timeTriggered : FC->timeTriggered;
   
   if (millis() < timeTriggered + FL_FC->serviceTime) { // service here
-    Serial.println("Servcing FL_FC");
+//    Serial.println("Servcing FL_FC");
     digitalWrite(48, HIGH);
     
   } else { // the service is done. change states (children too).
-    Serial.println("Servce time for FL_FC expired");
+//    Serial.println("Servce time for FL_FC expired");
     digitalWrite(48, LOW);
     FL_FC->state = SERVICED;
     FL->state = UP;

@@ -115,7 +115,7 @@ Bumper *FR = &fr;
 Bumper *BL = &bl;
 Bumper *BR = &br;
 
-DoubleBumper fl_fc = { "FL_FC", .state = SERVICED, .service = service_FL_FC, .serviceTime = 7000, .children = { FL, FC } };
+DoubleBumper fl_fc = { "FL_FC", .state = SERVICED, .service = service_FL_FC, .serviceTime = 1000, .children = { FL, FC } };
 DoubleBumper fc_fr = { "FC_FR", .state = SERVICED, .service = service_FC_FR, .serviceTime = 1000, .children = { FC, FR } };
 DoubleBumper bl_br = { "BL_BR", .state = SERVICED, .service = service_BL_BR, .serviceTime = 1000, .children = { BL, BR } };
 
@@ -209,7 +209,7 @@ void loop() {
   
   // ** EXECUTE STATE-INDEPENDENT ACTIONS (I can't think of any) ** //
   
-  Serial.println("------------------------");
+//  Serial.println("------------------------");
 }
 
 
