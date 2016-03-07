@@ -12,8 +12,8 @@ void detect_color() {
   // turn off blue LED
   digitalWrite(BLUE_LED, LOW);
 
-  Serial.print("reading: ");
-  Serial.println(calcVolts(reading));
+  // Serial.print("reading: ");
+  // Serial.println(calcVolts(reading));
   
   if (calcVolts(reading) < BLUE_THRESHOLD) {
     ColorState = BLUE;
@@ -23,8 +23,8 @@ void detect_color() {
     ColorState = BLACK;
   }
   
-  Serial.print("ColorState: ");
-  Serial.println(ColorState);
+  // Serial.print("ColorState: ");
+  // Serial.println(ColorState);
 }
 
 // scales 0-1023 to 0-5
@@ -39,14 +39,14 @@ void follow_path(Color pathColor) {
 
   switch (PathState) {
     case PATH_FINDING:
-      Serial.println("path finding...");
+      // Serial.println("path finding...");
       if (ColorState == pathColor) {
         PathState = ON_PATH;
       }
       forward_slow();
       break;
     case ON_PATH:
-      Serial.print("on path!");
+      // Serial.print("on path!");
       if (ColorState != pathColor) { // we've just moved off the path
         PathState = SEARCHING_FIRST_SIDE;
         SearchStartTime = millis();
@@ -55,11 +55,11 @@ void follow_path(Color pathColor) {
       forward_slow();
       break;
     case SEARCHING_FIRST_SIDE:
-      Serial.print("searching first side - ");
-      Serial.println(SearchSide == SEARCHING_LEFT ? "SEARCHING_LEFT" : "SEARCHING_RIGHT");
+      // Serial.print("searching first side - ");
+      // Serial.println(SearchSide == SEARCHING_LEFT ? "SEARCHING_LEFT" : "SEARCHING_RIGHT");
 
       if ((millis() - SearchStartTime > MinSearchTime) && ColorState == pathColor) {
-        Serial.println("checking for path!!!!!!!!!!!");
+        // Serial.println("checking for path!!!!!!!!!!!");
         PathState = ON_PATH; // check at the end search time
       }
       
@@ -77,8 +77,8 @@ void follow_path(Color pathColor) {
       }
       break;
     case SEARCHING_SECOND_SIDE:
-      Serial.print("searching second side - ");
-      Serial.println(SearchSide == SEARCHING_LEFT ? "SEARCHING_LEFT" : "SEARCHING_RIGHT");
+      // Serial.print("searching second side - ");
+      // Serial.println(SearchSide == SEARCHING_LEFT ? "SEARCHING_LEFT" : "SEARCHING_RIGHT");
 
       if ((millis() - SearchStartTime > MinSearchTime) && ColorState == pathColor) {
         PathState = ON_PATH; // check at the end search time
