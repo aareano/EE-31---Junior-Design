@@ -89,7 +89,6 @@ typedef struct Bumper {
 typedef struct DoubleBumper {
   char name[6];
   DoubleBumperState state;
-  long timeTriggered;
   ServiceFunc service;
   long serviceTime;
   Bumper *children[2];
@@ -104,11 +103,11 @@ void service_FL_FC();
 void service_FC_FR();
 void service_BL_BR();
 
-Bumper fl = { .pin = 2,  .pinState = false, .ledPin = 40, "FL", .state = UP, .timeTriggered = 0, .service = service_FL, .serviceTime = 7000, .lastDebounceTime = 0 };
-Bumper fc = { .pin = 18, .pinState = false, .ledPin = 41, "FC", .state = UP, .timeTriggered = 0, .service = service_FC, .serviceTime = 500, .lastDebounceTime = 0 };
-Bumper fr = { .pin = 19, .pinState = false, .ledPin = 42, "FR", .state = UP, .timeTriggered = 0, .service = service_FR, .serviceTime = 500, .lastDebounceTime = 0 };
-Bumper bl = { .pin = 20, .pinState = false, .ledPin = 43, "BL", .state = UP, .timeTriggered = 0, .service = service_BL, .serviceTime = 500, .lastDebounceTime = 0 };
-Bumper br = { .pin = 21, .pinState = false, .ledPin = 44, "BR", .state = UP, .timeTriggered = 0, .service = service_BR, .serviceTime = 500, .lastDebounceTime = 0 };
+Bumper fl = { .pin = 2,  .pinState = false, .ledPin = 40, "FL", .state = UP, .timeTriggered = 0, .service = service_FL, .serviceTime = 1000, .lastDebounceTime = 0 };
+Bumper fc = { .pin = 18, .pinState = false, .ledPin = 41, "FC", .state = UP, .timeTriggered = 0, .service = service_FC, .serviceTime = 1000, .lastDebounceTime = 0 };
+Bumper fr = { .pin = 19, .pinState = false, .ledPin = 42, "FR", .state = UP, .timeTriggered = 0, .service = service_FR, .serviceTime = 1000, .lastDebounceTime = 0 };
+Bumper bl = { .pin = 20, .pinState = false, .ledPin = 43, "BL", .state = UP, .timeTriggered = 0, .service = service_BL, .serviceTime = 1000, .lastDebounceTime = 0 };
+Bumper br = { .pin = 21, .pinState = false, .ledPin = 44, "BR", .state = UP, .timeTriggered = 0, .service = service_BR, .serviceTime = 1000, .lastDebounceTime = 0 };
 
 Bumper *FL = &fl;
 Bumper *FC = &fc;
@@ -116,9 +115,9 @@ Bumper *FR = &fr;
 Bumper *BL = &bl;
 Bumper *BR = &br;
 
-DoubleBumper fl_fc = { "FL_FC", .state = SERVICED, .timeTriggered = 0, .service = service_FL_FC, .serviceTime = 500, .children = { FL, FC } };
-DoubleBumper fc_fr = { "FC_FR", .state = SERVICED, .timeTriggered = 0, .service = service_FC_FR, .serviceTime = 500, .children = { FC, FR } };
-DoubleBumper bl_br = { "BL_BR", .state = SERVICED, .timeTriggered = 0, .service = service_BL_BR, .serviceTime = 500, .children = { BL, BR } };
+DoubleBumper fl_fc = { "FL_FC", .state = SERVICED, .service = service_FL_FC, .serviceTime = 7000, .children = { FL, FC } };
+DoubleBumper fc_fr = { "FC_FR", .state = SERVICED, .service = service_FC_FR, .serviceTime = 1000, .children = { FC, FR } };
+DoubleBumper bl_br = { "BL_BR", .state = SERVICED, .service = service_BL_BR, .serviceTime = 1000, .children = { BL, BR } };
 
 DoubleBumper *FL_FC = &fl_fc;
 DoubleBumper *FC_FR = &fc_fr;
@@ -159,6 +158,8 @@ void setup() {
   pinMode(FR->ledPin, OUTPUT);
   pinMode(BL->ledPin, OUTPUT);
   pinMode(BR->ledPin, OUTPUT);
+
+  pinMode(48, OUTPUT);  // temp LED for double bumper
 
   // set initial state
   ColorState = BLACK;
@@ -208,7 +209,7 @@ void loop() {
   
   // ** EXECUTE STATE-INDEPENDENT ACTIONS (I can't think of any) ** //
   
-  delay(500);
   Serial.println("------------------------");
 }
+
 
