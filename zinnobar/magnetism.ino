@@ -5,7 +5,7 @@ void poll_h_sensor() {
 //  Serial.print("pulling H sensor: ");
 //  Serial.println(reading);
   if (reading < H_THRESHOLD) {
-    Serial.println("found mine");
+//    Serial.println("found mine");
     MineState = FOUND;
   } else {
     MineState = NONE;

@@ -170,7 +170,7 @@ void service_FL() {
   
   // if the service time hasn't expired, service here
   if (millis() < FL->timeTriggered + FL->serviceTime) {
-//    Serial.println("Servcing FL");
+    Serial.println("FL bumper is pressed.");
     
     digitalWrite(FL->ledPin, HIGH);
   
@@ -185,7 +185,10 @@ void service_FL() {
 
 
 void service_FC() {
+  
   if (millis() < FC->timeTriggered + FC->serviceTime) { // service here
+    Serial.println("FC bumper is pressed.");
+    
     digitalWrite(FC->ledPin, HIGH);
   } else { // the service is done. change states.
     digitalWrite(FC->ledPin, LOW);
@@ -196,6 +199,8 @@ void service_FC() {
 
 void service_FR() {
   if (millis() < FR->timeTriggered + FR->serviceTime) { // service here
+    Serial.println("FR bumper is pressed.");
+    
     digitalWrite(FR->ledPin, HIGH);
   } else { // the service is done. change states.
     digitalWrite(FR->ledPin, LOW);
@@ -206,6 +211,8 @@ void service_FR() {
 
 void service_BL() {
   if (millis() < BL->timeTriggered + BL->serviceTime) { // service here
+    Serial.println("BL bumper is pressed.");
+    
     digitalWrite(BL->ledPin, HIGH);
   } else { // the service is done. change states.
     digitalWrite(BL->ledPin, LOW);
@@ -216,6 +223,8 @@ void service_BL() {
 
 void service_BR() {
   if (millis() < BR->timeTriggered + BR->serviceTime) { // service here
+    Serial.println("BR bumper is pressed.");
+    
     digitalWrite(BR->ledPin, HIGH);
   } else { // the service is done. change states.
     digitalWrite(BR->ledPin, LOW);
@@ -231,6 +240,10 @@ void service_FL_FC() {
   
   if (millis() < timeTriggered + FL_FC->serviceTime) { // service here
 //    Serial.println("Servcing FL_FC");
+    
+    Serial.println("FL bumper is pressed.");
+    Serial.println("FC bumper is pressed.");
+    
     digitalWrite(48, HIGH);
     
   } else { // the service is done. change states (children too).
@@ -248,9 +261,12 @@ void service_FC_FR() {
   long timeTriggered = FC->timeTriggered > FR->timeTriggered ? FC->timeTriggered : FR->timeTriggered;
   
   if (millis() < timeTriggered + FC_FR->serviceTime) { // service here
-    digitalWrite(BL->ledPin, HIGH);
+    Serial.println("FC bumper is pressed.");
+    Serial.println("FR bumper is pressed.");
+    
+    digitalWrite(48, HIGH);
   } else { // the service is done. change states (children too).
-    digitalWrite(BL->ledPin, LOW);
+    digitalWrite(48, LOW);
     FC_FR->state = SERVICED;
     FC->state = UP;
     FR->state = UP;
@@ -263,9 +279,12 @@ void service_BL_BR() {
   long timeTriggered = BL->timeTriggered > BR->timeTriggered ? BL->timeTriggered : BR->timeTriggered;
   
   if (millis() < timeTriggered + BL_BR->serviceTime) { // service here
-    digitalWrite(BR->ledPin, HIGH);
+    Serial.println("BL bumper is pressed.");
+    Serial.println("BR bumper is pressed.");
+    
+    digitalWrite(48, HIGH);
   } else { // the service is done. change states (children too).
-    digitalWrite(BR->ledPin, LOW);
+    digitalWrite(48, LOW);
     BL_BR->state = SERVICED;
     BL->state = UP;
     BR->state = UP;

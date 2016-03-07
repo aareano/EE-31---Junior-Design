@@ -177,11 +177,13 @@ void loop() {
 
   // ** UPDATE THE CURRENT STATE (if necessary) ** //
   
-  // check for collision
-  poll_bumpers();
-
-  // handle collision
-  service_collisions();
+  if (CD_enabled) {
+    // check for collision
+    poll_bumpers();
+  
+    // handle collision
+    service_collisions();
+  }
 
   // check hall effect sensor
   poll_h_sensor();
