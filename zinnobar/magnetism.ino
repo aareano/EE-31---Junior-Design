@@ -1,6 +1,6 @@
 // ******************* HALL EFFECT SENSOR CONTROL ******************* //
 
-void pull_h_sensor() {
+void poll_h_sensor() {
   float reading = calcVolts(analogRead(H_SENSOR));
 //  Serial.print("pulling H sensor: ");
 //  Serial.println(reading);
