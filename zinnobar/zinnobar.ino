@@ -19,10 +19,10 @@ int rightMotorSpeed = 0;  // varies from -100 to 100
 int leftMotorSpeed = 0;   // varies from -100 to 100
 
 // pins
-int GATE1 = 3;  // red
-int GATE2 = 5;  // brown
-int GATE3 = 6;  // orange
-int GATE4 = 9;  // yellow
+int GATE1 = 5;   // red
+int GATE2 = 6;   // brown
+int GATE3 = 9;   // orange
+int GATE4 = 10;  // yellow
 
 enum MotorName { LEFT, RIGHT };
 
@@ -126,6 +126,11 @@ DoubleBumper *BL_BR = &bl_br;
 Bumper *Bumpers[] = { FL, FC, FR, BL, BR };
 DoubleBumper *DoubleBumpers[] = { FL_FC, FC_FR, BL_BR };
 
+// Communications
+int commsIn = 3;    // pins
+int commsOut = 36;
+int commsLength = 600; // max 600 ms for a single message
+
 // the setup routine runs once when you press reset:
 void setup() {
   Serial.begin(9600);
@@ -171,9 +176,13 @@ void setup() {
   halt();
 }
 
+long count = 0;
 // the loop routine runs over and over again forever:
 // the loop is for changing the state if necessary, then executing the current state.
 void loop() {
+  Serial.print(count++);
+  Serial.print(" - ");
+  Serial.println(millis());
 
   // ** UPDATE THE CURRENT STATE (if necessary) ** //
   
@@ -200,6 +209,7 @@ void loop() {
   service_mine();
 
   // execute driving
+  halt();
   drive();  
   
   // execute (sound) communication
