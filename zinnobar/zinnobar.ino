@@ -97,34 +97,28 @@ typedef struct DoubleBumper {
 void service_FL();
 void service_FC();
 void service_FR();
-void service_BL();
-void service_BR();
+void service_B();
 void service_FL_FC();
 void service_FC_FR();
-void service_BL_BR();
 
 Bumper fl = { .pin = 2,  .pinState = false, .ledPin = 40, "FL", .state = UP, .timeTriggered = 0, .service = service_FL, .serviceTime = 1000, .lastDebounceTime = 0 };
 Bumper fc = { .pin = 18, .pinState = false, .ledPin = 41, "FC", .state = UP, .timeTriggered = 0, .service = service_FC, .serviceTime = 1000, .lastDebounceTime = 0 };
 Bumper fr = { .pin = 19, .pinState = false, .ledPin = 42, "FR", .state = UP, .timeTriggered = 0, .service = service_FR, .serviceTime = 1000, .lastDebounceTime = 0 };
-Bumper bl = { .pin = 20, .pinState = false, .ledPin = 43, "BL", .state = UP, .timeTriggered = 0, .service = service_BL, .serviceTime = 1000, .lastDebounceTime = 0 };
-Bumper br = { .pin = 21, .pinState = false, .ledPin = 44, "BR", .state = UP, .timeTriggered = 0, .service = service_BR, .serviceTime = 1000, .lastDebounceTime = 0 };
+Bumper b  = { .pin = 20, .pinState = false, .ledPin = 43, "BL", .state = UP, .timeTriggered = 0, .service = service_B, .serviceTime = 1000, .lastDebounceTime = 0 };
 
 Bumper *FL = &fl;
 Bumper *FC = &fc;
 Bumper *FR = &fr;
-Bumper *BL = &bl;
-Bumper *BR = &br;
+Bumper *B  = &b;
 
 DoubleBumper fl_fc = { "FL_FC", .state = SERVICED, .service = service_FL_FC, .serviceTime = 1000, .children = { FL, FC } };
 DoubleBumper fc_fr = { "FC_FR", .state = SERVICED, .service = service_FC_FR, .serviceTime = 1000, .children = { FC, FR } };
-DoubleBumper bl_br = { "BL_BR", .state = SERVICED, .service = service_BL_BR, .serviceTime = 1000, .children = { BL, BR } };
 
 DoubleBumper *FL_FC = &fl_fc;
 DoubleBumper *FC_FR = &fc_fr;
-DoubleBumper *BL_BR = &bl_br;
 
-Bumper *Bumpers[] = { FL, FC, FR, BL, BR };
-DoubleBumper *DoubleBumpers[] = { FL_FC, FC_FR, BL_BR };
+Bumper *Bumpers[] = { FL, FC, FR, B };
+DoubleBumper *DoubleBumpers[] = { FL_FC, FC_FR };
 
 // Communication
 int commsIn = 3;        // pins
@@ -153,19 +147,16 @@ void setup() {
   pinMode(FL->pin, OUTPUT);
   pinMode(FC->pin, OUTPUT);
   pinMode(FR->pin, OUTPUT);
-  pinMode(BL->pin, OUTPUT);
-  pinMode(BR->pin, OUTPUT);
+  pinMode(B->pin, OUTPUT);
   attachInterrupt(digitalPinToInterrupt(FL->pin), FL_bumper_event, CHANGE);
   attachInterrupt(digitalPinToInterrupt(FC->pin), FC_bumper_event, CHANGE);
   attachInterrupt(digitalPinToInterrupt(FR->pin), FR_bumper_event, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(BL->pin), BL_bumper_event, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(BR->pin), BR_bumper_event, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(B->pin),  B_bumper_event, CHANGE);
 
   pinMode(FL->ledPin, OUTPUT);
   pinMode(FC->ledPin, OUTPUT);
   pinMode(FR->ledPin, OUTPUT);
-  pinMode(BL->ledPin, OUTPUT);
-  pinMode(BR->ledPin, OUTPUT);
+  pinMode(B->ledPin,  OUTPUT);
 
   pinMode(48, OUTPUT);  // temp LED for double bumper
 

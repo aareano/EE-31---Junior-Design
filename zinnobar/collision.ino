@@ -29,8 +29,7 @@ void service_collisions() {
 
         // if the double bumper that encompansses this single bumper is SERVICING, then don't service the single bumper
         if (((FL_FC->children[0] == Bumpers[i] || FL_FC->children[1] == Bumpers[i]) && FL_FC->state == SERVICING)
-          || ((FC_FR->children[0] == Bumpers[i] || FC_FR->children[1] == Bumpers[i]) && FC_FR->state == SERVICING)
-          || ((BL_BR->children[0] == Bumpers[i] || BL_BR->children[1] == Bumpers[i]) && BL_BR->state == SERVICING)) {
+          || ((FC_FR->children[0] == Bumpers[i] || FC_FR->children[1] == Bumpers[i]) && FC_FR->state == SERVICING)) {
           continue;
         } else {
           Bumpers[i]->service();  
@@ -40,8 +39,7 @@ void service_collisions() {
         
         // if the double bumper that encompansses this single bumper is SERVICING, then don't service the single bumper
         if (((FL_FC->children[0] == Bumpers[i] || FL_FC->children[1] == Bumpers[i]) && FL_FC->state == SERVICING)
-          || ((FC_FR->children[0] == Bumpers[i] || FC_FR->children[1] == Bumpers[i]) && FC_FR->state == SERVICING)
-          || ((BL_BR->children[0] == Bumpers[i] || BL_BR->children[1] == Bumpers[i]) && BL_BR->state == SERVICING)) {
+          || ((FC_FR->children[0] == Bumpers[i] || FC_FR->children[1] == Bumpers[i]) && FC_FR->state == SERVICING)) {
           continue;
         } else {
           Bumpers[i]->service();  
@@ -51,8 +49,7 @@ void service_collisions() {
         
         // if the double bumper that encompansses this single bumper is SERVICING, then don't service the single bumper
         if (((FL_FC->children[0] == Bumpers[i] || FL_FC->children[1] == Bumpers[i]) && FL_FC->state == SERVICING)
-          || ((FC_FR->children[0] == Bumpers[i] || FC_FR->children[1] == Bumpers[i]) && FC_FR->state == SERVICING)
-          || ((BL_BR->children[0] == Bumpers[i] || BL_BR->children[1] == Bumpers[i]) && BL_BR->state == SERVICING)) {
+          || ((FC_FR->children[0] == Bumpers[i] || FC_FR->children[1] == Bumpers[i]) && FC_FR->state == SERVICING)) {
           continue;
         } else {
           Bumpers[i]->service();  
@@ -136,11 +133,6 @@ void updateStates() {
 //    Serial.print(FC_FR->name);
 //    Serial.println(" >> SERVICING");
   }
-  if ((BL->state == DOWN || BL->state == DOWN_SERVICING) && (BR->state == DOWN || BR->state == DOWN_SERVICING)) {
-    BL_BR->state = SERVICING;
-//    Serial.print(BL_BR->name);
-//    Serial.println(" >> SERVICING");
-  }
 }
 
 // interrupts to update the time of the last voltage change on each switch
@@ -157,12 +149,8 @@ void FR_bumper_event() {
   FR->lastDebounceTime = millis();
 }
 
-void BL_bumper_event() {
-  BL->lastDebounceTime = millis();
-}
-
-void BR_bumper_event() {
-  BR->lastDebounceTime = millis();
+void B_bumper_event() {
+  B->lastDebounceTime = millis();
 }
 
 // function to service the FL bumper when it is triggered individually
@@ -183,7 +171,6 @@ void service_FL() {
   }
 }
 
-
 void service_FC() {
   if (millis() < FC->timeTriggered + FC->serviceTime) { // service here
     digitalWrite(FC->ledPin, HIGH);
@@ -192,7 +179,6 @@ void service_FC() {
     FC->state = UP;
   }
 }
-
 
 void service_FR() {
   if (millis() < FR->timeTriggered + FR->serviceTime) { // service here
@@ -203,23 +189,12 @@ void service_FR() {
   }
 }
 
-
-void service_BL() {
-  if (millis() < BL->timeTriggered + BL->serviceTime) { // service here
-    digitalWrite(BL->ledPin, HIGH);
+void service_B() {
+  if (millis() < B->timeTriggered + B->serviceTime) { // service here
+    digitalWrite(B->ledPin, HIGH);
   } else { // the service is done. change states.
-    digitalWrite(BL->ledPin, LOW);
-    BL->state = UP;
-  }
-}
-
-
-void service_BR() {
-  if (millis() < BR->timeTriggered + BR->serviceTime) { // service here
-    digitalWrite(BR->ledPin, HIGH);
-  } else { // the service is done. change states.
-    digitalWrite(BR->ledPin, LOW);
-    BR->state = UP;
+    digitalWrite(B->ledPin, LOW);
+    B->state = UP;
   }
 }
 
@@ -248,27 +223,12 @@ void service_FC_FR() {
   long timeTriggered = FC->timeTriggered > FR->timeTriggered ? FC->timeTriggered : FR->timeTriggered;
   
   if (millis() < timeTriggered + FC_FR->serviceTime) { // service here
-    digitalWrite(BL->ledPin, HIGH);
+    digitalWrite(B->ledPin, HIGH);
   } else { // the service is done. change states (children too).
-    digitalWrite(BL->ledPin, LOW);
+    digitalWrite(B->ledPin, LOW);
     FC_FR->state = SERVICED;
     FC->state = UP;
     FR->state = UP;
-  }
-}
-
-
-void service_BL_BR() {
-  // the timeTriggered is the timeTriggered of the child that has the largest (most recent) timeTriggered
-  long timeTriggered = BL->timeTriggered > BR->timeTriggered ? BL->timeTriggered : BR->timeTriggered;
-  
-  if (millis() < timeTriggered + BL_BR->serviceTime) { // service here
-    digitalWrite(BR->ledPin, HIGH);
-  } else { // the service is done. change states (children too).
-    digitalWrite(BR->ledPin, LOW);
-    BL_BR->state = SERVICED;
-    BL->state = UP;
-    BR->state = UP;
   }
 }
 
