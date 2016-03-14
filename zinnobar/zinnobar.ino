@@ -126,10 +126,13 @@ DoubleBumper *BL_BR = &bl_br;
 Bumper *Bumpers[] = { FL, FC, FR, BL, BR };
 DoubleBumper *DoubleBumpers[] = { FL_FC, FC_FR, BL_BR };
 
-// Communications
-int commsIn = 3;    // pins
+// Communication
+int commsIn = 3;        // pins
 int commsOut = 36;
-int commsLength = 600; // max 600 ms for a single message
+bool receivingMessage = false;  // if true, we're receiving a message
+long messageTimeout = 8000;     // max 600 ms for a single message
+long messageStartTime = 0;
+int pulseCount = 0;   // number of pulses we've received
 
 // the setup routine runs once when you press reset:
 void setup() {
@@ -166,6 +169,9 @@ void setup() {
 
   pinMode(48, OUTPUT);  // temp LED for double bumper
 
+  pinMode(commsIn, INPUT);
+  attachInterrupt(digitalPinToInterrupt(commsIn), receivedPulse, RISING);
+
   // set initial state
   ColorState = BLACK;
   MineState = NONE;
@@ -176,37 +182,44 @@ void setup() {
   halt();
 }
 
-long count = 0;
+//long count = 0;
 // the loop routine runs over and over again forever:
 // the loop is for changing the state if necessary, then executing the current state.
 void loop() {
-  Serial.print(count++);
-  Serial.print(" - ");
-  Serial.println(millis());
+//  Serial.print(count++);
+//  Serial.print(" - ");
+//  Serial.println(millis());
 
   // ** UPDATE THE CURRENT STATE (if necessary) ** //
   
   // check for collision
-  poll_bumpers();
+//  poll_bumpers();
 
   // handle collision
-  service_collisions();
+//  service_collisions();
 
   // check hall effect sensor
-  poll_h_sensor();
+//  poll_h_sensor();
   
   // check sound reciever(s)
+  if (millis() - messageStartTime > messageTimeout) {
+    receivingMessage = false;
+  }
+  // if the message is over and we have pulses that we've counted...
+  if (receivingMessage == false && pulseCount > 0) {
+    serviceMessage();
+  }
     
   // check color sensor
-  detect_color();
+//  detect_color();
   
   // path following
-  follow_path(PathToFollow);
+//  follow_path(PathToFollow);
 
   // ** EXECUTE THE CURRENT STATE ** //
   
   // execute mine state
-  service_mine();
+//  service_mine();
 
   // execute driving
   halt();
