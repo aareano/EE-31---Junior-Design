@@ -121,7 +121,7 @@ Bumper *Bumpers[] = { FL, FC, FR, B };
 DoubleBumper *DoubleBumpers[] = { FL_FC, FC_FR };
 
 // Communication
-int commsIn = 3;        // pins
+int commsIn = 21;        // pins
 int commsOut = 36;
 bool receivingMessage = false;  // if true, we're receiving a message
 long messageTimeout = 8000;     // max 600 ms for a single message
@@ -160,6 +160,7 @@ void setup() {
 
   pinMode(48, OUTPUT);  // temp LED for double bumper
 
+  pinMode(commsOut, OUTPUT);
   pinMode(commsIn, INPUT);
   attachInterrupt(digitalPinToInterrupt(commsIn), receivedPulse, RISING);
 
@@ -217,6 +218,7 @@ void loop() {
   drive();  
   
   // execute (sound) communication
+  sendMessage(4, 1);
   
   // execute any other state-dependent actions (e.g. light LEDs)
     
