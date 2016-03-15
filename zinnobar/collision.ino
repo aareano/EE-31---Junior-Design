@@ -173,9 +173,9 @@ void service_FL() {
 
 void service_FC() {
   if (millis() < FC->timeTriggered + FC->serviceTime) { // service here
-    digitalWrite(FC->ledPin, HIGH);
+    reverse();
   } else { // the service is done. change states.
-    digitalWrite(FC->ledPin, LOW);
+    halt();
     FC->state = UP;
   }
 }
