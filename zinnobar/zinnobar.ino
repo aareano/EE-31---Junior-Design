@@ -164,6 +164,34 @@ void setup() {
   pinMode(commsIn, INPUT);
   attachInterrupt(digitalPinToInterrupt(commsIn), receivedPulse, RISING);
 
+
+  // FAST PWM - START
+
+  pinMode(25, OUTPUT); // change these pins as needed
+  pinMode(26, OUTPUT);
+  pinMode(27, OUTPUT);
+
+  TCCR3A = _BV(COM3A0) | _BV(COM3B0) | _BV(WGM30) | _BV(WGM31);
+ 
+  // sets COM Output Mode to FastPWM with toggle of OC3A on compare match with OCR3A
+  // also sets WGM to mode 15: FastPWM with top set by OCR3A
+
+  TCCR3B = _BV(WGM32) | _BV(WGM33) |  _BV(CS31);
+
+  // sets WGM as stated above; sets clock scaling to "divide by 8"
+
+  OCR3A = 53; // adjust this to adjust the frequency (use test-and-check)
+
+  // above sets the counter value at which register resets to 0x0000;
+
+  // generate 18.523 kHz when OCR3A=53 on Mega pin 5
+
+  Serial.println(TCCR3A, BIN);
+  Serial.println(TCCR3B, BIN);
+
+  // FAST PWM - END
+
+
   // set initial state
   ColorState = BLACK;
   MineState = NONE;
