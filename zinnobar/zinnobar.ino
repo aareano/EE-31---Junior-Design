@@ -1,5 +1,4 @@
 
-
 // *************************** //
 //      --------------------
 //            |            |
@@ -19,10 +18,10 @@ int rightMotorSpeed = 0;  // varies from -100 to 100
 int leftMotorSpeed = 0;   // varies from -100 to 100
 
 // pins
-int GATE1 = 5;   // red
-int GATE2 = 6;   // brown
-int GATE3 = 9;   // orange
-int GATE4 = 10;  // yellow
+int GATE1 = 6;   // red
+int GATE2 = 9;   // brown
+int GATE3 = 10;   // orange
+int GATE4 = 11;  // yellow
 
 enum MotorName { LEFT, RIGHT };
 
@@ -165,32 +164,11 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(commsIn), receivedPulse, RISING);
 
 
-  // FAST PWM - START
-
-  pinMode(25, OUTPUT); // change these pins as needed
-  pinMode(26, OUTPUT);
-  pinMode(27, OUTPUT);
-
+  // generate 18.523 kHz when OCR3A=53 on Mega pin 5 (additional comments on trunk and lecture slides)
+  pinMode(5, OUTPUT);
   TCCR3A = _BV(COM3A0) | _BV(COM3B0) | _BV(WGM30) | _BV(WGM31);
- 
-  // sets COM Output Mode to FastPWM with toggle of OC3A on compare match with OCR3A
-  // also sets WGM to mode 15: FastPWM with top set by OCR3A
-
   TCCR3B = _BV(WGM32) | _BV(WGM33) |  _BV(CS31);
-
-  // sets WGM as stated above; sets clock scaling to "divide by 8"
-
-  OCR3A = 53; // adjust this to adjust the frequency (use test-and-check)
-
-  // above sets the counter value at which register resets to 0x0000;
-
-  // generate 18.523 kHz when OCR3A=53 on Mega pin 5
-
-  Serial.println(TCCR3A, BIN);
-  Serial.println(TCCR3B, BIN);
-
-  // FAST PWM - END
-
+  OCR3A = 53; // higher numbers here mean lower out frequencies
 
   // set initial state
   ColorState = BLACK;
@@ -246,7 +224,7 @@ void loop() {
   drive();  
   
   // execute (sound) communication
-  sendMessage(4, 1);
+  sendMessage(18700, 1);
   
   // execute any other state-dependent actions (e.g. light LEDs)
     

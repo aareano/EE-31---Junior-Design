@@ -1,5 +1,6 @@
 // ******************* COMMUNICATION CONTROL ******************* //
 
+// an interrupt function for counting pulses
 void receivedPulse() {  
   Serial.println("receivedPulse()");
   if (receivingMessage) {
@@ -11,6 +12,8 @@ void receivedPulse() {
   }
 }
 
+
+// respond to a message, depending on how many pulses we received
 void serviceMessage() {
 //  if (pulseCount >= 17 && pulseCount <= 23) {
   if (pulseCount >= 1 && pulseCount <= 3) {
@@ -33,6 +36,7 @@ void serviceMessage() {
   pulseCount = 0;  // reset pulseCount
 }
 
+// send a square wave (message) with a given frequency (hz) and a given number of pulses (depending on messageNum)
 void sendMessage(float hz, int messageNum) {
   int tempRSpeed = rightMotorSpeed;
   int tempLSpeed = leftMotorSpeed;
