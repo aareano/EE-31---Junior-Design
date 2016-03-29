@@ -120,12 +120,11 @@ Bumper *Bumpers[] = { FL, FC, FR, B };
 DoubleBumper *DoubleBumpers[] = { FL_FC, FC_FR };
 
 // Communication
-int commsIn = 21;        // pins
+int commsIn = 21;
 int commsOut = 36;
-bool receivingMessage = false;  // if true, we're receiving a message
-long messageTimeout = 8000;     // max 600 ms for a single message
-long messageStartTime = 0;
-int pulseCount = 0;   // number of pulses we've received
+enum CommandCenterMessage { BEGIN, FOUND_MINE, FINISHED }
+enum BotMessage { MOVE_FORWARD, MOVE_BACKWARD, TURN_RIGHT, TURN_LEFT };
+
 
 // the setup routine runs once when you press reset:
 void setup() {
@@ -198,15 +197,6 @@ void loop() {
 
   // check hall effect sensor
 //  poll_h_sensor();
-  
-  // check sound reciever(s)
-  if (millis() - messageStartTime > messageTimeout) {
-    receivingMessage = false;
-  }
-  // if the message is over and we have pulses that we've counted...
-  if (receivingMessage == false && pulseCount > 0) {
-    serviceMessage();
-  }
     
   // check color sensor
 //  detect_color();
@@ -224,7 +214,7 @@ void loop() {
   drive();  
   
   // execute (sound) communication
-  sendMessage(18700, 1);
+  
   
   // execute any other state-dependent actions (e.g. light LEDs)
     
