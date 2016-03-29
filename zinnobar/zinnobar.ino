@@ -122,8 +122,8 @@ DoubleBumper *DoubleBumpers[] = { FL_FC, FC_FR };
 // Communication
 int commsIn = 21;
 int commsOut = 36;
-enum CommandCenterMessage { BEGIN, FOUND_MINE, FINISHED }
-enum BotMessage { MOVE_FORWARD, MOVE_BACKWARD, TURN_RIGHT, TURN_LEFT };
+enum CommandCenterMessage { BEGIN, FOUND_MINE, FINISHED };
+enum BotSequence { MOVE_FORWARD_12, MOVE_FORWARD_15, MOVE_BACKWARD_3, TURN_RIGHT, TURN_LEFT, TURN_180 };
 
 
 // the setup routine runs once when you press reset:
@@ -223,5 +223,4 @@ void loop() {
   
 //  Serial.println("------------------------");
 }
-
 
