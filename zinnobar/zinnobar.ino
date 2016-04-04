@@ -120,11 +120,17 @@ Bumper *Bumpers[] = { FL, FC, FR, B };
 DoubleBumper *DoubleBumpers[] = { FL_FC, FC_FR };
 
 // Communication
-int commsIn = 21;
+int commsIn = A2;
 int commsOut = 36;
-enum CommandCenterMessage { BEGIN, FOUND_MINE, FINISHED };
-enum BotSequence { MOVE_FORWARD_12, MOVE_FORWARD_15, MOVE_BACKWARD_3, TURN_RIGHT, TURN_LEFT, TURN_180 };
+int commsAlert = 37;
+enum Message { BEGIN, FOUND_MINE, FINISHED, COMPANION_MOVE };
+enum Comms { COMMS_LISTENING, COMMS_RECEIVING };
+Comms CommsState;
 
+enum Master { LISTENING_MY_TURN, LISTENING_COMPANIONS_TURN, FINDING_PATH, FOLLOWING_PATH, FINAL_WAIT, FINAL_ALIGNMENT };
+Master MasterState;
+enum Bot { NIGHTWING, SCARLET_WITCH };  // NIGHTWING goes first, then SCARLET_WITCH
+Bot BotColor;
 
 // the setup routine runs once when you press reset:
 void setup() {
@@ -160,7 +166,7 @@ void setup() {
 
   pinMode(commsOut, OUTPUT);
   pinMode(commsIn, INPUT);
-  attachInterrupt(digitalPinToInterrupt(commsIn), receivedPulse, RISING);
+  pinMode(commsAlert, INPUT);
 
 
   // generate 18.523 kHz when OCR3A=53 on Mega pin 5 (additional comments on trunk and lecture slides)
@@ -169,58 +175,61 @@ void setup() {
   TCCR3B = _BV(WGM32) | _BV(WGM33) |  _BV(CS31);
   OCR3A = 53; // higher numbers here mean lower out frequencies
 
-  // set initial state
-  ColorState = BLACK;
-  MineState = NONE;
+  // set initial states
   
+  BotColor = NIGHTWING;   // eventually turn this into a switch on the bot
+  if (BotColor == NIGHTWING) {
+    MasterState = LISTENING_MY_TURN;
+  } else if (BotColor == SCARLET_WITCH) {
+    MasterState = LISTENING_COMPANIONS_TURN;
+  }
+  
+  CommsState = COMMS_LISTENING;
   PathState = PATH_FINDING;
   SearchSide = SEARCHING_LEFT;  
-  PathToFollow = BLUE;
+  ColorState = BLACK;
+  MineState = NONE;
   halt();
 }
 
-//long count = 0;
 // the loop routine runs over and over again forever:
 // the loop is for changing the state if necessary, then executing the current state.
 void loop() {
-//  Serial.print(count++);
-//  Serial.print(" - ");
-//  Serial.println(millis());
-
-  // ** UPDATE THE CURRENT STATE (if necessary) ** //
-  
-  // check for collision
-//  poll_bumpers();
-
-  // handle collision
-//  service_collisions();
-
-  // check hall effect sensor
-//  poll_h_sensor();
-    
-  // check color sensor
-//  detect_color();
-  
-  // path following
-//  follow_path(PathToFollow);
-
-  // ** EXECUTE THE CURRENT STATE ** //
-  
-  // execute mine state
-//  service_mine();
-
-  // execute driving
-  halt();
-  drive();  
-  
-  // execute (sound) communication
-  
-  
-  // execute any other state-dependent actions (e.g. light LEDs)
-    
-  
-  // ** EXECUTE STATE-INDEPENDENT ACTIONS (I can't think of any) ** //
-  
-//  Serial.println("------------------------");
+  switch (MasterState) {
+    case LISTENING_MY_TURN:
+      halt();
+      drive();
+      if (CommsState == COMMS_LISTENING) {
+        poll_comms();
+      }
+      if (CommsState == COMMS_RECEIVING) {
+        receive_message();
+      }
+      break;
+    case LISTENING_COMPANIONS_TURN:
+      halt();
+      drive();
+      if (CommsState == COMMS_LISTENING) {
+        poll_comms();
+      }
+      if (CommsState == COMMS_RECEIVING) {
+        receive_message();
+      }
+      break;
+    case FINDING_PATH:
+      poll_comms();    // do we need this here?
+      poll_bumpers();
+      service_collisions();
+      detect_color();
+      drive();
+      break;
+    case FOLLOWING_PATH:
+      poll_comms();    // do we need this here?
+      poll_h_sensor();
+      detect_color();
+      follow_path(PathToFollow);
+      service_mine();
+      drive();
+      break;
+  }
 }
-
