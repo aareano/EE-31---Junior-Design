@@ -3,74 +3,77 @@
 
 // FYI - fast PWM is ouputting on pin 5 (see setup() in zinnobar.ino)
 
-
-// ISR for commsIN pin - notifies bot that we recieved an inital impulse
-void receivedPulse() {
-  receiveMessageFromCommandCenter();
+boolean poll_comms() {
+  if (calcVolts(analogRead(commsIn)) > 1.0) {
+    CommsState = COMMS_RECEIVING;
+    return true;
+  } else {
+    CommsState = COMMS_LISTENING;
+    return false;
+  }
 }
 
+// ISR for the commsIn pin
 // poll the input pin every 10 ms 50x (500ms total)
-// count the pulses that occur in that amount of time
-void receiveMessageFromCommandCenter() {
+void receive_message() {
   int pulseCount = 0;
   for (int i = 0; i < 50; i++) {
-    if (digitalRead(commsIn) == HIGH) {
+    if (calcVolts(analogRead(commsIn)) > 1.0) {
       pulseCount++;
     }
     delay(10);
   }
-  serviceCommandCenterMessage(pulseCount);
-}
-
-void receiveMessageFromBot() {
-  int pulseCount = 0;
-  for (int i = 0; i < 50; i++) {
-    if (digitalRead(commsIn) == HIGH) {
-      pulseCount++;
-    }
-    delay(10);
-  }
-  serviceBotMessage(pulseCount);
-}
-
-// respond to a message, depending on how many pulses we received
-void serviceCommandCenterMessage(int pulseCount) {
+  digitalWrite(commsAlert, LOW);
+  Serial.print("pulse count: ");
+  Serial.println(pulseCount);
+  
   if (pulseCount >= 17 && pulseCount <= 23) {
-    // message 1
-    Serial.println("received message 1");
+    Serial.println("received 200 ms message");
+
+//    if (MasterSequence == LISTENING_MY_TURN) {
+//        MasterSequence = FINDING_PATH;
+//    }
+//    if (BotColor == NIGHTWING) {
+//      if (MasterSequence == LISTENING_COMPANIONS_TURN) {
+//        MasterSequence = FINAL_WAIT;
+//      }
+//    }
+//    if (BotColor == SCARLET_WITCH) {
+//      if (MasterSequence == LISTENING_COMPANIONS_TURN) {
+//        MasterSequence = LISTENING_MY_TURN;
+//      }
+//    }
+    
   } else if (pulseCount >= 27 && pulseCount <= 33) {
-    // message 2
-    Serial.println("received message 2");
+    Serial.println("received 300 ms message");
+
+    
+    
   } else if (pulseCount >= 37 && pulseCount <= 43) {
-    // message 3
-    Serial.println("received message 3");
+    Serial.println("received 400 ms message");
   } else {
     Serial.println("*** Received an unknown message in serviceMessage() ***");
   }
-}
 
-void serviceBotMessage(int pulseCount) {
-  if (pulseCount >= 27 && pulseCount <= 33) {
-    // message 1
-    // TODO: step through the BotSequence { MOVE_FORWARD_12, MOVE_FORWARD_15, MOVE_BACKWARD_3, TURN_RIGHT, TURN_LEFT, TURN_180 }
-    Serial.println("received message from companion bot!");
-  }
+  CommsState = COMMS_LISTENING;
 }
 
 // message protocol is simply on-delay-off
-void sendMessageToCommandCenter(CommandCenterMessage message) {
+void send_message(Message message) {
+  int offsetMs = 10;
   digitalWrite(commsOut, HIGH);
   switch (message) {
     case FOUND_MINE:
-      delay(300);
+      delay(300 + offsetMs);
       break;
     case FINISHED:
-      delay(400);
+      delay(400 + offsetMs);
       break;
     default:
       Serial.println("*** Trying to send an unknown message in sendMessageToCommandCenter() ***");
   }
   digitalWrite(commsOut, LOW);
+  delay(1500);
 }
 
 // Challenge 2: The two bots communicate with each other sending commands to
@@ -79,9 +82,3 @@ void sendMessageToCommandCenter(CommandCenterMessage message) {
 // up as close as possible to the bot’s starting position. This test is ninety seconds.
 
 // lasser is allowing us to do additional actions besides those specified in the challenge
-
-void sendMessageToBot() {
-  digitalWrite(commsOut, HIGH);
-  delay(300);
-  digitalWrite(commsOut, LOW);
-}
