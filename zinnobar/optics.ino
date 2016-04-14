@@ -17,14 +17,14 @@ void detect_color() {
   
   if (calcVolts(reading) < BLUE_THRESHOLD) {
     ColorState = BLUE;
+//    Serial.println("BLUE");
   } else if (calcVolts(reading) < RED_THRESHOLD) {
+//    Serial.println("RED");
     ColorState = RED;
   } else { // BLACK
+//    Serial.println("BLACK");
     ColorState = BLACK;
   }
-  
-  // Serial.print("ColorState: ");
-  // Serial.println(ColorState);
 }
 
 // scales 0-1023 to 0-5
@@ -46,7 +46,7 @@ void follow_path(Color pathColor) {
       forward_slow();
       break;
     case ON_PATH:
-      // Serial.print("on path!");
+      // Serial.println("on path!");
       if (ColorState != pathColor) { // we've just moved off the path
         PathState = SEARCHING_FIRST_SIDE;
         SearchStartTime = millis();
@@ -100,4 +100,3 @@ void follow_path(Color pathColor) {
       break;
   }
 }
-
