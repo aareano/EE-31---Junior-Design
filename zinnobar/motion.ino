@@ -71,7 +71,7 @@ void turnMotor(MotorName mName, int highPin, int lowPin, float dutyCycle) {
   int lowPWM = 0;
   
   if (mName == RIGHT) {
-    int offset = 7;
+    int offset = 0;
     highPWM = calcPWM(roundPWM(dutyCycle + offset, 15, 85));
   } else {
     int offset = 0;
@@ -126,4 +126,3 @@ int roundPWM(int PWM, int localMin, int localMax) {
   }
   return PWM;
 }
-
