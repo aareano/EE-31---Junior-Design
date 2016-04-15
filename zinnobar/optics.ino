@@ -12,17 +12,17 @@ void detect_color() {
   // turn off blue LED
   digitalWrite(BLUE_LED, LOW);
 
-  // Serial.print("reading: ");
-  // Serial.println(calcVolts(reading));
+   Serial.print("reading: ");
+   Serial.println(calcVolts(reading));
   
   if (calcVolts(reading) < BLUE_THRESHOLD) {
     ColorState = BLUE;
-//    Serial.println("BLUE");
+    Serial.println("BLUE");
   } else if (calcVolts(reading) < RED_THRESHOLD) {
-//    Serial.println("RED");
+    Serial.println("RED");
     ColorState = RED;
   } else { // BLACK
-//    Serial.println("BLACK");
+    Serial.println("BLACK");
     ColorState = BLACK;
   }
 }
