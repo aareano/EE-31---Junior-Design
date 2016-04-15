@@ -18,10 +18,10 @@ int rightMotorSpeed = 0;  // varies from -100 to 100
 int leftMotorSpeed = 0;   // varies from -100 to 100
 
 // pins
-int GATE1 = 9;   // red
-int GATE2 = 6;   // brown
-int GATE3 = 11;   // orange
-int GATE4 = 10;  // yellow
+int GATE1 = 9;   // orange
+int GATE2 = 6;   // yellow
+int GATE3 = 10;  // grey
+int GATE4 = 11;  // purple
 
 enum MotorName { LEFT, RIGHT };
 
@@ -201,6 +201,8 @@ void loop() {
   if (testing) {
     detect_color();
     follow_path(PathToFollow);
+    poll_h_sensor();
+    service_h_sensor();
     drive();
     return;
   }
@@ -237,7 +239,7 @@ void loop() {
       poll_h_sensor();
       detect_color();
       follow_path(PathToFollow);
-      service_mine();
+      service_h_sensor();
       drive();
       break;
   }
