@@ -231,4 +231,3 @@ void service_FC_FR() {
     FR->state = UP;
   }
 }
-
