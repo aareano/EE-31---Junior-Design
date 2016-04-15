@@ -12,11 +12,12 @@ void poll_h_sensor() {
   }
 }
 
-void service_mine() {
+void service_h_sensor() {
   if (MineState == FOUND) {
-    digitalWrite(H_LED, HIGH);
+    send_message(FOUND_MINE);
+    send_message(FOUND_MINE);
+    halt();
   } else if (MineState == NONE) {
-    digitalWrite(H_LED, LOW);
+    // do nothing
   }
 }
-
