@@ -60,6 +60,10 @@ void receive_message() {
 
 // message protocol is simply on-delay-off
 void send_message(Message message) {
+  int tempRSpeed = rightMotorSpeed;
+  int tempLSpeed = leftMotorSpeed;
+  halt();
+  drive();
   int offsetMs = 10;
   digitalWrite(commsOut, HIGH);
   switch (message) {
@@ -74,6 +78,9 @@ void send_message(Message message) {
   }
   digitalWrite(commsOut, LOW);
   delay(1500);
+  rightMotorSpeed = tempRSpeed;
+  leftMotorSpeed = tempLSpeed;
+  drive();
 }
 
 // Challenge 2: The two bots communicate with each other sending commands to
