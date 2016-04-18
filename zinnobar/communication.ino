@@ -30,6 +30,8 @@ void receive_message() {
   if (pulseCount >= 17 && pulseCount <= 23) {
     Serial.println("received 200 ms message");
 
+    MasterState = FOLLOWING_PATH;
+
 //    if (MasterSequence == LISTENING_MY_TURN) {
 //        MasterSequence = FINDING_PATH;
 //    }
