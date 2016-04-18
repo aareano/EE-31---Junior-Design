@@ -36,6 +36,16 @@ void reverse() {
     leftMotorSpeed = -50;
 }
 
+void reverseRight() {
+    rightMotorSpeed = -50;
+    leftMotorSpeed = -15;
+}
+
+void reverseLeft() {
+    rightMotorSpeed = -15;
+    leftMotorSpeed = -50;
+}
+
 void halt() {
   rightMotorSpeed = 0;
   leftMotorSpeed = 0;
