@@ -20,8 +20,8 @@ int leftMotorSpeed = 0;   // varies from -100 to 100
 // pins
 int GATE1 = 9;   // orange
 int GATE2 = 6;   // yellow
-int GATE3 = 10;  // grey
-int GATE4 = 11;  // purple
+int GATE3 = 11;  // grey
+int GATE4 = 10;  // purple
 
 enum MotorName { LEFT, RIGHT };
 
@@ -63,9 +63,8 @@ enum Mine { NONE, FOUND };
 Mine MineState;
 
 // Collision Detection
-bool CD_enabled = true;
-const int BumperCount = 5;
-const int DoubleBumperCount = 3;
+const int BumperCount = 4;
+const int DoubleBumperCount = 2;
 
 int BumperDebounceDelay = 50; // the signal needs to be steady for 50ms before it's considered valid
 
@@ -103,7 +102,7 @@ void service_FC_FR();
 Bumper fl = { .pin = 2,  .pinState = false, .ledPin = 40, "FL", .state = UP, .timeTriggered = 0, .service = service_FL, .serviceTime = 1000, .lastDebounceTime = 0 };
 Bumper fc = { .pin = 18, .pinState = false, .ledPin = 41, "FC", .state = UP, .timeTriggered = 0, .service = service_FC, .serviceTime = 1000, .lastDebounceTime = 0 };
 Bumper fr = { .pin = 19, .pinState = false, .ledPin = 42, "FR", .state = UP, .timeTriggered = 0, .service = service_FR, .serviceTime = 1000, .lastDebounceTime = 0 };
-Bumper b  = { .pin = 20, .pinState = false, .ledPin = 43, "BL", .state = UP, .timeTriggered = 0, .service = service_B, .serviceTime = 1000, .lastDebounceTime = 0 };
+Bumper b  = { .pin = 20, .pinState = false, .ledPin = 43, "B",  .state = UP, .timeTriggered = 0, .service = service_B,  .serviceTime = 1000, .lastDebounceTime = 0 };
 
 Bumper *FL = &fl;
 Bumper *FC = &fc;
@@ -127,7 +126,7 @@ enum Message { BEGIN, FOUND_MINE, FINISHED, COMPANION_MOVE };
 enum Comms { COMMS_LISTENING, COMMS_RECEIVING };
 Comms CommsState;
 
-enum Master { LISTENING_MY_TURN, LISTENING_COMPANIONS_TURN, FINDING_PATH, FOLLOWING_PATH, FINAL_WAIT, FINAL_ALIGNMENT };
+enum Master { LISTENING_MY_TURN, LISTENING_COMPANIONS_TURN, FOLLOWING_PATH, FINISH_LINE, FINAL_WAIT, FINAL_ALIGNMENT, END };
 Master MasterState;
 enum Bot { NIGHTWING, SCARLET_WITCH };  // NIGHTWING goes first, then SCARLET_WITCH
 Bot BotColor;
@@ -197,15 +196,20 @@ void setup() {
 // the loop routine runs over and over again forever:
 // the loop is for changing the state if necessary, then executing the current state.
 void loop() {
-  boolean testing = true;
+  boolean testing = false;
   if (testing) {
-    detect_color();
-    follow_path(PathToFollow);
-    poll_h_sensor();
-    service_h_sensor();
     drive();
+//    poll_bumpers();
+//    service_collisions();
+    if (CommsState == COMMS_LISTENING) {
+        poll_comms();
+    }
+    if (CommsState == COMMS_RECEIVING) {
+      receive_message();
+    }
     return;
   }
+  
   switch (MasterState) {
     case LISTENING_MY_TURN:
       halt();
@@ -227,19 +231,30 @@ void loop() {
         receive_message();
       }
       break;
-    case FINDING_PATH:
-      poll_comms();    // do we need this here?
-      poll_bumpers();
-      service_collisions();
-      detect_color();
-      drive();
-      break;
     case FOLLOWING_PATH:
-      poll_comms();    // do we need this here?
-      poll_h_sensor();
+      if (CommsState == COMMS_LISTENING) {
+        poll_comms();
+      }
+      if (CommsState == COMMS_RECEIVING) {
+        receive_message();
+      }
       detect_color();
       follow_path(PathToFollow);
+      poll_bumpers();
+      service_collisions();
+      poll_h_sensor();
       service_h_sensor();
+      drive();
+      break;
+    case FINISH_LINE:
+      detect_color();
+      follow_path(PathToFollow);
+      poll_bumpers();
+      service_collisions();
+      drive();
+      break;
+    case END:
+      halt();
       drive();
       break;
   }
