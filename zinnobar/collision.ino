@@ -7,7 +7,9 @@
 // https://www.arduino.cc/en/Tutorial/Debounce
 void poll_bumpers() {
   for(int i = 0; i < BumperCount; i++) {
-    
+//    Serial.print("polling Bumper: ");
+//    Serial.println(Bumpers[i]->name);
+
     // if the input has settled and existed for long enough as the same value, use it!
     if ((millis() - Bumpers[i]->lastDebounceTime) > BumperDebounceDelay) {
       Bumpers[i]->pinState = digitalRead(Bumpers[i]->pin) == HIGH ? true : false;
@@ -125,19 +127,19 @@ void updateStates() {
   // if two adjacent bumpers are down, service the collision with a double bumper instead of the single bumpers
   if ((FL->state == DOWN || FL->state == DOWN_SERVICING) && (FC->state == DOWN || FC->state == DOWN_SERVICING)) {
     FL_FC->state = SERVICING;
-//    Serial.print(FL_FC->name);
-//    Serial.println(" >> SERVICING");
+    Serial.print(FL_FC->name);
+    Serial.println(" >> SERVICING");
   }
   if ((FC->state == DOWN || FC->state == DOWN_SERVICING) && (FR->state == DOWN || FR->state == DOWN_SERVICING)) {
     FC_FR->state = SERVICING;
-//    Serial.print(FC_FR->name);
-//    Serial.println(" >> SERVICING");
+    Serial.print(FC_FR->name);
+    Serial.println(" >> SERVICING");
   }
 }
 
 // interrupts to update the time of the last voltage change on each switch
 void FL_bumper_event() {
-//  Serial.println("FL bounced");
+  Serial.println("FL bounced");
   FL->lastDebounceTime = millis();
 }
 
@@ -159,21 +161,22 @@ void service_FL() {
   // if the service time hasn't expired, service here
   if (millis() < FL->timeTriggered + FL->serviceTime) {
 //    Serial.println("Servcing FL");
+    reverseLeft();
     
-    digitalWrite(FL->ledPin, HIGH);
-  
-  // the service is done. change states.
-  } else {
-//    Serial.println("Service time for FL is expried");
-
-    digitalWrite(FL->ledPin, LOW);
+  } else {  // the service is done. change states.
+    Serial.println("Service time for FL is expried");
     FL->state = UP;
   }
 }
 
 void service_FC() {
   if (millis() < FC->timeTriggered + FC->serviceTime) { // service here
-    reverse();
+    if (MasterState == FINISH_LINE) {
+      MasterState = END;
+    } else {
+      reverse();
+    }
+  
   } else { // the service is done. change states.
     halt();
     FC->state = UP;
@@ -182,7 +185,8 @@ void service_FC() {
 
 void service_FR() {
   if (millis() < FR->timeTriggered + FR->serviceTime) { // service here
-    digitalWrite(FR->ledPin, HIGH);
+    reverseRight();
+    
   } else { // the service is done. change states.
     digitalWrite(FR->ledPin, LOW);
     FR->state = UP;
@@ -191,7 +195,8 @@ void service_FR() {
 
 void service_B() {
   if (millis() < B->timeTriggered + B->serviceTime) { // service here
-    digitalWrite(B->ledPin, HIGH);
+   forward_slow();
+   
   } else { // the service is done. change states.
     digitalWrite(B->ledPin, LOW);
     B->state = UP;
@@ -205,12 +210,9 @@ void service_FL_FC() {
   long timeTriggered = FL->timeTriggered > FC->timeTriggered ? FL->timeTriggered : FC->timeTriggered;
   
   if (millis() < timeTriggered + FL_FC->serviceTime) { // service here
-//    Serial.println("Servcing FL_FC");
-    digitalWrite(48, HIGH);
+    reverseLeft();
     
   } else { // the service is done. change states (children too).
-//    Serial.println("Servce time for FL_FC expired");
-    digitalWrite(48, LOW);
     FL_FC->state = SERVICED;
     FL->state = UP;
     FC->state = UP;
@@ -223,9 +225,9 @@ void service_FC_FR() {
   long timeTriggered = FC->timeTriggered > FR->timeTriggered ? FC->timeTriggered : FR->timeTriggered;
   
   if (millis() < timeTriggered + FC_FR->serviceTime) { // service here
-    digitalWrite(B->ledPin, HIGH);
+    reverseRight();
+    
   } else { // the service is done. change states (children too).
-    digitalWrite(B->ledPin, LOW);
     FC_FR->state = SERVICED;
     FC->state = UP;
     FR->state = UP;
