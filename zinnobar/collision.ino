@@ -175,8 +175,8 @@ void service_FL() {
         break;
       case FIND_WALL: {
         Serial.println("collided with wall");
-        int reverseTime = 200;
-        int spinTime = 500;
+        int reverseTime = 100;
+        int spinTime = 825;
         if (millis() < FL->timeTriggered + reverseTime) {
           Serial.println("reverse");
           reverse();
@@ -190,6 +190,8 @@ void service_FL() {
           }
         } else {
           Serial.println("delay, move to next state");
+          halt();
+          drive();
           MasterSequenceNum++;  // finished with this service, move on to the next collision
           delay(FL->serviceTime - reverseTime + spinTime + 10); // delay to expire service time
         }
@@ -231,8 +233,8 @@ void service_FC() {
         break;
       case FIND_WALL: {
         Serial.println("collided with wall");
-        int reverseTime = 200;
-        int spinTime = 500;
+        int reverseTime = 100;
+        int spinTime = 825;    // 1684 millis per rotation
         if (millis() < FC->timeTriggered + reverseTime) {
           Serial.println("reverse");
           reverse();
@@ -246,6 +248,8 @@ void service_FC() {
           }
         } else {
           Serial.println("delay, move to next state");
+          halt();
+          drive();
           MasterSequenceNum++; // finished with this service, move on to the next collision
           delay(FL->serviceTime - reverseTime + spinTime + 10); // delay to expire service time
         }
@@ -287,8 +291,8 @@ void service_FR() {
         break;
       case FIND_WALL: {
         Serial.println("collided with wall");
-        int reverseTime = 200;
-        int spinTime = 500;
+        int reverseTime = 100;
+        int spinTime = 825;
         if (millis() < FR->timeTriggered + reverseTime) {
           Serial.println("reverse");
           reverse();
@@ -302,6 +306,8 @@ void service_FR() {
           }
         } else {
           Serial.println("delay, move to next state");
+          halt();
+          drive();
           MasterSequenceNum++; // finished with this service, move on to the next collision
           delay(FL->serviceTime - reverseTime + spinTime + 10); // delay to expire service time
         }
