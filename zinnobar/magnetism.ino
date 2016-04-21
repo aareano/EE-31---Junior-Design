@@ -14,7 +14,7 @@ void poll_h_sensor() {
 
 void service_h_sensor() {
   if (MineState == FOUND) {
-    MasterSequence = LISTENING_MINE;
+    MasterSequenceNum++;
     send_message(FOUND_MINE);
     send_message(FOUND_MINE);
   } else if (MineState == NONE) {
