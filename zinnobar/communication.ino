@@ -23,44 +23,44 @@ void receive_message() {
     }
     delay(10);
   }
+  Serial.println(millis());
   digitalWrite(commsAlert, LOW);
   Serial.print("pulse count: ");
   Serial.println(pulseCount);
   
   if (pulseCount >= 17 && pulseCount <= 23) {
     Serial.println("received 200 ms message");
-    digitalWrite(alertRed, HIGH);
-    delay(200);
-    digitalWrite(alertRed, LOW);
+    flash_led(alertRed, 250);
 
-    // MasterSequence = FOLLOWING_PATH;
-
-//    if (MasterSequence == LISTENING_MY_TURN) {
-//        MasterSequence = FINDING_PATH;
-//    }
-//    if (BotColor == NIGHTWING) {
-//      if (MasterSequence == LISTENING_COMPANIONS_TURN) {
-//        MasterSequence = FINAL_WAIT;
-//      }
-//    }
-//    if (BotColor == SCARLET_WITCH) {
-//      if (MasterSequence == LISTENING_COMPANIONS_TURN) {
-//        MasterSequence = LISTENING_MY_TURN;
-//      }
-//    }
+    switch(MasterSequence[MasterSequenceNum]) {
+        case LISTENING_MY_TURN:
+          MasterSequence++;   // progress to the next state in the sequence
+          break;
+        case LISTENING_COMPANIONS_TURN:
+          MasterSequence++;
+          break;
+    }
     
   } else if (pulseCount >= 27 && pulseCount <= 33) {
     Serial.println("received 300 ms message");
+    flash_led(alertYellow, 250);
 
-    digitalWrite(alertYellow, HIGH);
-    delay(200);
-    digitalWrite(alertYellow, LOW);
+    switch(MasterSequence[MasterSequenceNum]) {
+        case LISTENING_MINE:
+          MasterSequence++;
+          break;
+    }
     
   } else if (pulseCount >= 37 && pulseCount <= 43) {
     Serial.println("received 400 ms message");
-    digitalWrite(alertBlue, HIGH);
-    delay(200);
-    digitalWrite(alertBlue, LOW);
+    flash_led(alertBlue, 250);
+    
+    switch(MasterSequence[MasterSequenceNum]) {
+        case FINAL_WAIT:
+          MasterSequence++;
+          break;
+    }
+
   } else {
     Serial.println("*** Received an unknown message in serviceMessage() ***");
     digitalWrite(alertRed, HIGH);
@@ -79,23 +79,30 @@ void receive_message() {
 void send_message(Message message) {
   int tempRSpeed = rightMotorSpeed;
   int tempLSpeed = leftMotorSpeed;
-  noInterrupts();
   halt();
   drive();
   int offsetMs = 10;
   digitalWrite(commsOut, HIGH);
   switch (message) {
+    case BEGIN:
+      digitalWrite(alertRed, HIGH);
+      delay(200 + offsetMs);
+      digitalWrite(alertRed, LOW);
+      break;
     case FOUND_MINE:
+      digitalWrite(alertYellow, HIGH);
       delay(300 + offsetMs);
+      digitalWrite(alertYellow, LOW);
       break;
     case FINISHED:
+      digitalWrite(alertBlue, HIGH);
       delay(400 + offsetMs);
+      digitalWrite(alertBlue, LOW);
       break;
     default:
       Serial.println("*** Trying to send an unknown message in sendMessageToCommandCenter() ***");
   }
   digitalWrite(commsOut, LOW);
-  interrupts();
   delay(1500);
   rightMotorSpeed = tempRSpeed;
   leftMotorSpeed = tempLSpeed;
