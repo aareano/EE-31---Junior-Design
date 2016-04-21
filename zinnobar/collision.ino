@@ -139,20 +139,52 @@ void updateStates() {
 
 // interrupts to update the time of the last voltage change on each switch
 void FL_bumper_event() {
-  Serial.println("FL bounced");
-  FL->lastDebounceTime = millis();
+  if (MasterSequence == LOCKED) {
+    UserCombo[lockInputNum++] = LEFT;
+  } else if (MasterSequence == SETTINGS) {
+    BotType = SCARLET_WITCH;
+    MasterSequenceNum++;
+  } else {
+    Serial.println("FL bounced");
+    FL->lastDebounceTime = millis();
+  }
 }
 
 void FC_bumper_event() {
-  FC->lastDebounceTime = millis();
+  if (MasterSequence == LOCKED) {
+    UserCombo[lockInputNum++] = CENTER;
+  } else if (MasterSequence == SETTINGS) {
+    BotType = NIGHTWING;
+    MasterSequenceNum++;
+  } else {
+    FC->lastDebounceTime = millis();
+  }
 }
 
 void FR_bumper_event() {
-  FR->lastDebounceTime = millis();
+  if (MasterSequence == LOCKED) {
+    UserCombo[lockInputNum++] = RIGHT;
+  } else if (MasterSequence == SETTINGS) {
+    BotType = TEST_BOT;
+    MasterSequenceNum++;
+  } else {
+    FR->lastDebounceTime = millis();
+  }
 }
 
 void B_bumper_event() {
-  B->lastDebounceTime = millis();
+  if (MasterSequence == LOCKED) {
+    check_combo();
+  } else if (MasterSequence == SETTINGS) {
+    // this is not a valid option for settings
+  } else if (MasterSequence[MasterSequenceNum] == TEST_TRANSMITTER {
+    MasterSequenceNum++;
+  } else if (MasterSequence[MasterSequenceNum] == TEST_RECEIVER {
+    MasterSequenceNum--
+  } else {
+    FC->lastDebounceTime = millis();
+    B->lastDebounceTime = millis();
+  }
 }
 
 // function to service the FL bumper when it is triggered individually
@@ -171,8 +203,8 @@ void service_FL() {
 
 void service_FC() {
   if (millis() < FC->timeTriggered + FC->serviceTime) { // service here
-    if (MasterState == FINISH_LINE) {
-      MasterState = END;
+    if (MasterSequence == FINISH_LINE) {
+      MasterSequence = END;
     } else {
       reverse();
     }

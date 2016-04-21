@@ -122,14 +122,61 @@ DoubleBumper *DoubleBumpers[] = { FL_FC, FC_FR };
 int commsIn = A2;
 int commsOut = 36;
 int commsAlert = 37;
+int alertRed = 32;
+int alertYellow = 28;
+int alertBlue = 30;
 enum Message { BEGIN, FOUND_MINE, FINISHED, COMPANION_MOVE };
 enum Comms { COMMS_LISTENING, COMMS_RECEIVING };
 Comms CommsState;
 
-enum Master { LISTENING_MY_TURN, LISTENING_COMPANIONS_TURN, FOLLOWING_PATH, FINISH_LINE, FINAL_WAIT, FINAL_ALIGNMENT, END };
-Master MasterState;
-enum Bot { NIGHTWING, SCARLET_WITCH };  // NIGHTWING goes first, then SCARLET_WITCH
-Bot BotColor;
+// Combination Lock
+enum LockInput { LEFT, CENTER, RIGHT, EMPTY };
+int comboLength = 5;
+LockInput correctCombo[comboLength] = { LEFT, CENTER, RIGHT, LEFT, RIGHT };
+LockInput userCombo[comboLength] = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
+int lockInputNum = 0;
+
+// Master State
+enum Master { 
+  LOCKED, 
+  SETTINGS, 
+  APPLY_SETTINGS, 
+  LISTENING_MY_TURN, 
+  LISTENING_COMPANIONS_TURN, 
+  FOLLOWING_PATH, 
+  FINISH_LINE, 
+  FINAL_WAIT, 
+  FINAL_ALIGNMENT, 
+  END,
+  TEST_TRANSMITTER,
+  TEST_RECEIVER };
+Master InitializeSequence[] = { LOCKED, SETTINGS, APPLY_SETTINGS };
+Master ScarletWitchSequence[] = { 
+  LISTENING_MY_TURN, // listen for 200ms from command center
+  FIND_WALL,        // find wall (collision)
+  DISCOVER_PATH,    // back up from wall until on top of path
+  FOLLOW_PATH_1,    // follow path to find mine
+  LISTENING_MINE,   // wait for 300ms response from command center
+  FOLLOW_PATH_2,    // follow path to find end 
+  FINAL_COLLISION,  // blinks led
+  FINAL_WAIT,       // waits for 400 hz from other bot
+  END };            // blinks leds 10 times
+Master NightwingSequence[] = { 
+  LISTENING_COMPANIONS_TURN,
+  LISTENING_MY_TURN,
+  FIND_WALL,        // find wall (collision)
+  DISCOVER_PATH,    // back up from wall until on top of path
+  FOLLOW_PATH_1,    // follow path to find mine
+  LISTENING_MINE,   // wait for 300ms response from command center
+  FOLLOW_PATH_2,    // follow path to find end 
+  FINAL_COLLISION,  // blinks led
+  END };
+Master TestBotSequence[] = { TEST_TRANSMITTER, TEST_RECEIVER };
+Master MasterSequence[] = InitializeSequence; 
+int MasterSequenceNum = 0;
+
+enum Bot { NIGHTWING, SCARLET_WITCH, TEST_BOT };  // NIGHTWING goes first, then SCARLET_WITCH
+Bot BotType;
 
 // the setup routine runs once when you press reset:
 void setup() {
@@ -161,12 +208,12 @@ void setup() {
   pinMode(FR->ledPin, OUTPUT);
   pinMode(B->ledPin,  OUTPUT);
 
-  pinMode(48, OUTPUT);  // temp LED for double bumper
-
-  pinMode(commsOut, OUTPUT);
   pinMode(commsIn, INPUT);
   pinMode(commsAlert, INPUT);
-
+  pinMode(commsOut, OUTPUT);
+  pinMode(alertRed, OUTPUT);
+  pinMode(alertYellow, OUTPUT);
+  pinMode(alertBlue, OUTPUT);
 
   // generate 18.523 kHz when OCR3A=53 on Mega pin 5 (additional comments on trunk and lecture slides)
   pinMode(5, OUTPUT);
@@ -175,15 +222,6 @@ void setup() {
   OCR3A = 53; // higher numbers here mean lower out frequencies
 
   // set initial states
-  
-  BotColor = NIGHTWING;   // eventually turn this into a switch on the bot
-  if (BotColor == NIGHTWING) {
-    MasterState = LISTENING_MY_TURN;
-    PathToFollow = BLUE;
-  } else if (BotColor == SCARLET_WITCH) {
-    MasterState = LISTENING_COMPANIONS_TURN;
-    PathToFollow = RED;
-  }
   
   CommsState = COMMS_LISTENING;
   PathState = PATH_FINDING;
@@ -196,21 +234,43 @@ void setup() {
 // the loop routine runs over and over again forever:
 // the loop is for changing the state if necessary, then executing the current state.
 void loop() {
-  boolean testing = false;
-  if (testing) {
-    drive();
-//    poll_bumpers();
-//    service_collisions();
-    if (CommsState == COMMS_LISTENING) {
-        poll_comms();
-    }
-    if (CommsState == COMMS_RECEIVING) {
-      receive_message();
-    }
-    return;
-  }
   
-  switch (MasterState) {
+  switch (MasterSequence[MasterSequenceNum]) {
+    case LOCKED:
+      digitalWrite(alertYellow, HIGH);
+      break;
+    case SETTINGS:
+      break;
+    case APPLY_SETTINGS:
+      switch(BotyType) {
+        SCARLET_WITCH:
+          MasterSequence = ScarletWitchSequence;
+          break;
+        NIGHTWING:
+          MasterSequence = NightwingSequence;
+          break;
+        TEST_BOT:
+          MasterSequence = TestBotSequence;
+          break;
+      }
+      break;
+    case TEST_TRANSMITTER:
+      halt();
+      drive();
+      send_message(BEGIN);
+      send_message(FOUND_MINE);
+      send_message(FINISHED);
+      break;
+    case TEST_RECEIVER:
+      halt();
+      drive();
+      if (CommsState == COMMS_LISTENING) {
+        poll_comms();
+      }
+      if (CommsState == COMMS_RECEIVING) {
+        receive_message();
+      }
+      break;
     case LISTENING_MY_TURN:
       halt();
       drive();

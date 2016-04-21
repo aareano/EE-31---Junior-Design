@@ -29,8 +29,11 @@ void receive_message() {
   
   if (pulseCount >= 17 && pulseCount <= 23) {
     Serial.println("received 200 ms message");
+    digitalWrite(alertRed, HIGH);
+    delay(200);
+    digitalWrite(alertRed, LOW);
 
-    MasterState = FOLLOWING_PATH;
+    // MasterSequence = FOLLOWING_PATH;
 
 //    if (MasterSequence == LISTENING_MY_TURN) {
 //        MasterSequence = FINDING_PATH;
@@ -49,12 +52,24 @@ void receive_message() {
   } else if (pulseCount >= 27 && pulseCount <= 33) {
     Serial.println("received 300 ms message");
 
-    
+    digitalWrite(alertYellow, HIGH);
+    delay(200);
+    digitalWrite(alertYellow, LOW);
     
   } else if (pulseCount >= 37 && pulseCount <= 43) {
     Serial.println("received 400 ms message");
+    digitalWrite(alertBlue, HIGH);
+    delay(200);
+    digitalWrite(alertBlue, LOW);
   } else {
     Serial.println("*** Received an unknown message in serviceMessage() ***");
+    digitalWrite(alertRed, HIGH);
+    digitalWrite(alertYellow, HIGH);
+    digitalWrite(alertBlue, HIGH);
+    delay(200);
+    digitalWrite(alertRed, LOW);
+    digitalWrite(alertYellow, LOW);
+    digitalWrite(alertBlue, LOW);
   }
 
   CommsState = COMMS_LISTENING;
@@ -64,6 +79,7 @@ void receive_message() {
 void send_message(Message message) {
   int tempRSpeed = rightMotorSpeed;
   int tempLSpeed = leftMotorSpeed;
+  noInterrupts();
   halt();
   drive();
   int offsetMs = 10;
@@ -79,6 +95,7 @@ void send_message(Message message) {
       Serial.println("*** Trying to send an unknown message in sendMessageToCommandCenter() ***");
   }
   digitalWrite(commsOut, LOW);
+  interrupts();
   delay(1500);
   rightMotorSpeed = tempRSpeed;
   leftMotorSpeed = tempLSpeed;
