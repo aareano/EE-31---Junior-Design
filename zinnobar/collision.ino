@@ -139,76 +139,130 @@ void updateStates() {
 
 // interrupts to update the time of the last voltage change on each switch
 void FL_bumper_event() {
-  if (MasterSequence == LOCKED) {
-    UserCombo[lockInputNum++] = LEFT;
-  } else if (MasterSequence == SETTINGS) {
-    BotType = SCARLET_WITCH;
-    MasterSequenceNum++;
-  } else {
-    Serial.println("FL bounced");
-    FL->lastDebounceTime = millis();
-  }
+//  Serial.println("FL bounced");
+  FL->lastDebounceTime = millis();
 }
 
 void FC_bumper_event() {
-  if (MasterSequence == LOCKED) {
-    UserCombo[lockInputNum++] = CENTER;
-  } else if (MasterSequence == SETTINGS) {
-    BotType = NIGHTWING;
-    MasterSequenceNum++;
-  } else {
-    FC->lastDebounceTime = millis();
-  }
+  FC->lastDebounceTime = millis();
 }
 
 void FR_bumper_event() {
-  if (MasterSequence == LOCKED) {
-    UserCombo[lockInputNum++] = RIGHT;
-  } else if (MasterSequence == SETTINGS) {
-    BotType = TEST_BOT;
-    MasterSequenceNum++;
-  } else {
-    FR->lastDebounceTime = millis();
-  }
+  FR->lastDebounceTime = millis();
 }
 
 void B_bumper_event() {
-  if (MasterSequence == LOCKED) {
-    check_combo();
-  } else if (MasterSequence == SETTINGS) {
-    // this is not a valid option for settings
-  } else if (MasterSequence[MasterSequenceNum] == TEST_TRANSMITTER {
-    MasterSequenceNum++;
-  } else if (MasterSequence[MasterSequenceNum] == TEST_RECEIVER {
-    MasterSequenceNum--
-  } else {
-    FC->lastDebounceTime = millis();
-    B->lastDebounceTime = millis();
-  }
+  B->lastDebounceTime = millis();
 }
 
 // function to service the FL bumper when it is triggered individually
 void service_FL() {
-  
   // if the service time hasn't expired, service here
   if (millis() < FL->timeTriggered + FL->serviceTime) {
-//    Serial.println("Servcing FL");
-    reverseLeft();
-    
+    switch(MasterSequence[MasterSequenceNum]) {
+      case LOCKED:
+        Serial.println("LOCK_LEFT");
+        digitalWrite(alertRed, HIGH);
+        delay(100);
+        digitalWrite(alertRed, LOW);
+        userCombo[lockInputNum++] = LOCK_LEFT;
+        delay(FL->serviceTime + 10);
+        break;
+      case SETTINGS:
+        BotType = SCARLET_WITCH;
+        MasterSequenceNum++;
+        delay(FL->serviceTime + 10);
+        break;
+      case FIND_WALL: {
+        Serial.println("collided with wall");
+        int reverseTime = 200;
+        int spinTime = 500;
+        if (millis() < FL->timeTriggered + reverseTime) {
+          Serial.println("reverse");
+          reverse();
+        } else if (millis() < FL->timeTriggered + spinTime + reverseTime) {
+          if (BotType == SCARLET_WITCH) {
+            Serial.println("turnRightInPlace");
+            turnRightInPlace();
+          } else {
+            Serial.println("turnLeftInPlace");
+            turnLeftInPlace();
+          }
+        } else {
+          Serial.println("delay, move to next state");
+          MasterSequenceNum++;  // finished with this service, move on to the next collision
+          delay(FL->serviceTime - reverseTime + spinTime + 10); // delay to expire service time
+        }
+      } break;
+      case FOLLOW_PATH_2: {
+        Serial.println("Collided with final wall");
+        int reverseTime = 200;
+        if (millis() < FL->timeTriggered + reverseTime) {
+          Serial.println("reverse");
+          reverse();
+        }
+        MasterSequenceNum++;
+        delay(FL->serviceTime - reverseTime + 10);
+      } break;
+      default:
+        reverseLeft();
+    }
   } else {  // the service is done. change states.
-    Serial.println("Service time for FL is expried");
+//    Serial.println("Service time for FL is expried");
     FL->state = UP;
   }
 }
 
 void service_FC() {
   if (millis() < FC->timeTriggered + FC->serviceTime) { // service here
-    if (MasterSequence == FINISH_LINE) {
-      MasterSequence = END;
-    } else {
-      reverse();
+    switch(MasterSequence[MasterSequenceNum]) {
+      case LOCKED:
+        Serial.println("LOCK_CENTER");
+        digitalWrite(alertYellow, LOW);
+        delay(100);
+        digitalWrite(alertYellow, HIGH);
+        userCombo[lockInputNum++] = LOCK_CENTER;
+        delay(FC->serviceTime + 10);
+        break;
+      case SETTINGS:
+        BotType = NIGHTWING;
+        MasterSequenceNum++;
+        delay(FC->serviceTime + 10);
+        break;
+      case FIND_WALL: {
+        Serial.println("collided with wall");
+        int reverseTime = 200;
+        int spinTime = 500;
+        if (millis() < FC->timeTriggered + reverseTime) {
+          Serial.println("reverse");
+          reverse();
+        } else if (millis() < FC->timeTriggered + spinTime + reverseTime) {
+          if (BotType == SCARLET_WITCH) {
+            Serial.println("turnRightInPlace");
+            turnRightInPlace();
+          } else {
+            Serial.println("turnLeftInPlace");
+            turnLeftInPlace();
+          }
+        } else {
+          Serial.println("delay, move to next state");
+          MasterSequenceNum++; // finished with this service, move on to the next collision
+          delay(FL->serviceTime - reverseTime + spinTime + 10); // delay to expire service time
+        }
+      } break;
+      case FOLLOW_PATH_2: {
+        Serial.println("Collided with final wall");
+        int reverseTime = 200;
+        if (millis() < FC->timeTriggered + reverseTime) {
+          Serial.println("reverse");
+          reverse();
+        }
+        MasterSequenceNum++;
+        delay(FC->serviceTime - reverseTime + 10);
+      } break;
+      default:
+        reverse();
     }
-  
   } else { // the service is done. change states.
     halt();
     FC->state = UP;
@@ -217,20 +271,85 @@ void service_FC() {
 
 void service_FR() {
   if (millis() < FR->timeTriggered + FR->serviceTime) { // service here
-    reverseRight();
-    
+    switch(MasterSequence[MasterSequenceNum]) {
+      case LOCKED:
+        Serial.println("LOCK_RIGHT");
+        digitalWrite(alertBlue, HIGH);
+        delay(100);
+        digitalWrite(alertBlue, LOW);
+        userCombo[lockInputNum++] = LOCK_RIGHT;
+        delay(FR->serviceTime + 10);
+        break;
+      case SETTINGS:
+        BotType = TEST_BOT;
+        MasterSequenceNum++;
+        delay(FR->serviceTime + 10);
+        break;
+      case FIND_WALL: {
+        Serial.println("collided with wall");
+        int reverseTime = 200;
+        int spinTime = 500;
+        if (millis() < FR->timeTriggered + reverseTime) {
+          Serial.println("reverse");
+          reverse();
+        } else if (millis() < FR->timeTriggered + spinTime + reverseTime) {
+          if (BotType == SCARLET_WITCH) {
+            Serial.println("turnRightInPlace");
+            turnRightInPlace();
+          } else {
+            Serial.println("turnLeftInPlace");
+            turnLeftInPlace();
+          }
+        } else {
+          Serial.println("delay, move to next state");
+          MasterSequenceNum++; // finished with this service, move on to the next collision
+          delay(FL->serviceTime - reverseTime + spinTime + 10); // delay to expire service time
+        }
+      } break;
+      case FOLLOW_PATH_2: {
+        Serial.println("Collided with final wall");
+        int reverseTime = 200;
+        if (millis() < FR->timeTriggered + reverseTime) {
+          Serial.println("reverse");
+          reverse();
+        }
+        MasterSequenceNum++;
+        delay(FR->serviceTime - reverseTime + 10);
+      } break;
+      default:
+        reverseRight();
+
+    }
   } else { // the service is done. change states.
-    digitalWrite(FR->ledPin, LOW);
+    halt();
     FR->state = UP;
   }
 }
 
 void service_B() {
   if (millis() < B->timeTriggered + B->serviceTime) { // service here
-   forward_slow();
-   
+    switch(MasterSequence[MasterSequenceNum]) {
+      case LOCKED:
+        check_combo();
+        delay(B->serviceTime + 10);
+        break;
+      case SETTINGS:
+        // do nothing - this is not a valid option for settings
+        delay(B->serviceTime + 10);
+        break;
+      case TEST_TRANSMITTER:
+        MasterSequenceNum++;
+        delay(B->serviceTime + 10);
+        break;
+      case TEST_RECEIVER:
+        MasterSequenceNum--;
+        delay(B->serviceTime + 10);
+        break;
+      default:
+        forward_slow();
+    }
   } else { // the service is done. change states.
-    digitalWrite(B->ledPin, LOW);
+    halt();
     B->state = UP;
   }
 }
