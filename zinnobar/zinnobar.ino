@@ -20,8 +20,8 @@ int leftMotorSpeed = 0;   // varies from -100 to 100
 // pins
 int GATE1 = 9;   // orange
 int GATE2 = 6;   // yellow
-int GATE3 = 11;  // grey
-int GATE4 = 10;  // purple
+int GATE3 = 10;  // grey
+int GATE4 = 11;  // purple
 
 enum MotorName { LEFT, RIGHT };
 
@@ -130,10 +130,10 @@ enum Comms { COMMS_LISTENING, COMMS_RECEIVING };
 Comms CommsState;
 
 // Combination Lock
-enum LockInput { LEFT, CENTER, RIGHT, EMPTY };
+enum LockInput { LOCK_LEFT, LOCK_CENTER, LOCK_RIGHT, LOCK_EMPTY };
 int comboLength = 5;
-LockInput correctCombo[comboLength] = { LEFT, CENTER, RIGHT, LEFT, RIGHT };
-LockInput userCombo[comboLength] = { EMPTY, EMPTY, EMPTY, EMPTY, EMPTY };
+LockInput correctCombo[] = { LOCK_LEFT, LOCK_CENTER, LOCK_RIGHT, LOCK_LEFT, LOCK_RIGHT };
+LockInput userCombo[] = { LOCK_EMPTY, LOCK_EMPTY, LOCK_EMPTY, LOCK_EMPTY, LOCK_EMPTY };
 int lockInputNum = 0;
 
 // Master State
@@ -143,10 +143,13 @@ enum Master {
   APPLY_SETTINGS, 
   LISTENING_MY_TURN, 
   LISTENING_COMPANIONS_TURN, 
-  FOLLOWING_PATH, 
-  FINISH_LINE, 
+  FIND_WALL,
+  DISCOVER_PATH,  
+  FOLLOW_PATH_1, 
+  LISTENING_MINE, 
+  FOLLOW_PATH_2, 
+  FINAL_COLLISION, 
   FINAL_WAIT, 
-  FINAL_ALIGNMENT, 
   END,
   TEST_TRANSMITTER,
   TEST_RECEIVER };
@@ -172,7 +175,7 @@ Master NightwingSequence[] = {
   FINAL_COLLISION,  // blinks led
   END };
 Master TestBotSequence[] = { TEST_TRANSMITTER, TEST_RECEIVER };
-Master MasterSequence[] = InitializeSequence; 
+Master *MasterSequence = InitializeSequence; 
 int MasterSequenceNum = 0;
 
 enum Bot { NIGHTWING, SCARLET_WITCH, TEST_BOT };  // NIGHTWING goes first, then SCARLET_WITCH
@@ -234,34 +237,50 @@ void setup() {
 // the loop routine runs over and over again forever:
 // the loop is for changing the state if necessary, then executing the current state.
 void loop() {
-  
   switch (MasterSequence[MasterSequenceNum]) {
     case LOCKED:
+      halt();
+      drive();
       digitalWrite(alertYellow, HIGH);
+      poll_bumpers();
+      service_collisions();
       break;
     case SETTINGS:
+      halt();
+      drive();
+      poll_bumpers();
+      service_collisions();
       break;
     case APPLY_SETTINGS:
-      switch(BotyType) {
-        SCARLET_WITCH:
+      halt();
+      drive();
+      poll_bumpers();
+      service_collisions();
+      switch(BotType) {
+        case SCARLET_WITCH:
           MasterSequence = ScarletWitchSequence;
+          MasterSequenceNum = 0;
+          PathToFollow = RED;
+          flash_led(alertRed, 250);
           break;
-        NIGHTWING:
-          MasterSequence = NightwingSequence;
+        case NIGHTWING:
+          MasterSequence = ScarletWitchSequence; // NightwingSequence;
+          MasterSequenceNum = 0;
+          PathToFollow = BLUE;
+          flash_led(alertBlue, 250);
           break;
-        TEST_BOT:
+        case TEST_BOT:
           MasterSequence = TestBotSequence;
+          MasterSequenceNum = 0;
+          PathToFollow = RED;
+          flash_led(alertYellow, 250);
           break;
+        default:
+          ; // do nothing
       }
       break;
-    case TEST_TRANSMITTER:
-      halt();
-      drive();
-      send_message(BEGIN);
-      send_message(FOUND_MINE);
-      send_message(FINISHED);
-      break;
-    case TEST_RECEIVER:
+    case LISTENING_MY_TURN:         // listen for 200ms from command center
+      Serial.println("LISTENING_MY_TURN");
       halt();
       drive();
       if (CommsState == COMMS_LISTENING) {
@@ -271,7 +290,7 @@ void loop() {
         receive_message();
       }
       break;
-    case LISTENING_MY_TURN:
+    case LISTENING_COMPANIONS_TURN: // listen for second 200ms from command center
       halt();
       drive();
       if (CommsState == COMMS_LISTENING) {
@@ -281,41 +300,125 @@ void loop() {
         receive_message();
       }
       break;
-    case LISTENING_COMPANIONS_TURN:
-      halt();
+    case FIND_WALL:                 // find wall (collision)
+      Serial.println("FIND_WALL");
+      forward();
+      poll_bumpers();
+      service_collisions();
       drive();
-      if (CommsState == COMMS_LISTENING) {
-        poll_comms();
-      }
-      if (CommsState == COMMS_RECEIVING) {
-        receive_message();
-      }
       break;
-    case FOLLOWING_PATH:
-      if (CommsState == COMMS_LISTENING) {
-        poll_comms();
-      }
-      if (CommsState == COMMS_RECEIVING) {
-        receive_message();
-      }
+    case DISCOVER_PATH:             // find the path from the wall
+      Serial.println("DISCOVER_PATH");
+      forward();
       detect_color();
-      follow_path(PathToFollow);
+      if (ColorState == PathToFollow) {
+        MasterSequenceNum++; // found the path!
+      }
+      drive();      
+      break;
+    case FOLLOW_PATH_1:             // follow path to find mine
+      Serial.println("FOLLOW_PATH_1");
+      forward();
+      detect_color();
+      if (ColorState == RED)
+        light_led(alertRed);
+      else if (ColorState == BLUE)
+        light_led(alertBlue);
+      else
+        light_led(alertYellow);
+      follow_path();
       poll_bumpers();
       service_collisions();
       poll_h_sensor();
       service_h_sensor();
       drive();
       break;
-    case FINISH_LINE:
+    case LISTENING_MINE:            // wait for 300ms response from command center
+      halt();
+      drive();
+      if (CommsState == COMMS_LISTENING) {
+        poll_comms();
+      }
+      if (CommsState == COMMS_RECEIVING) {
+        receive_message();
+      }
+      break;
+    case FOLLOW_PATH_2:             // follow path to find end
+      forward();
       detect_color();
-      follow_path(PathToFollow);
+      follow_path();
       poll_bumpers();
       service_collisions();
       drive();
       break;
-    case END:
+    case FINAL_COLLISION:           // blinks led
+      send_message(FINISHED);
+      send_message(FINISHED);
+      MasterSequenceNum++;
+      break;
+    case FINAL_WAIT:                // waits for 400 hz from other bot
       halt();
       drive();
+      if (CommsState == COMMS_LISTENING) {
+        poll_comms();
+      }
+      if (CommsState == COMMS_RECEIVING) {
+        receive_message();
+      }
+      break;
+    case END:                       // blinks leds 10 times
+      for (int i = 0; i < 3; i++) {
+        digitalWrite(alertRed, HIGH);
+        digitalWrite(alertYellow, HIGH);
+        digitalWrite(alertBlue, HIGH);
+        delay(200);
+        digitalWrite(alertRed, LOW);
+        digitalWrite(alertYellow, LOW);
+        digitalWrite(alertBlue, LOW);
+      }
+      halt();
+      drive();
+      delay(1000);
+      break;
+    case TEST_TRANSMITTER:          // send each message, indicated with LEDs
+      halt();
+      drive();
+      poll_bumpers();
+      service_collisions();
+      
+      send_message(BEGIN);
+      send_message(FOUND_MINE);
+      send_message(FINISHED);
+      break;
+    case TEST_RECEIVER:             // recieve messages, indicated with LEDs
+      halt();
+      drive();
+      poll_bumpers();
+      service_collisions();
+      if (CommsState == COMMS_LISTENING) {
+        poll_comms();
+      }
+      if (CommsState == COMMS_RECEIVING) {
+        receive_message();
+      }
       break;
   }
+}
+
+void flash_led(int ledPin, int timeOn) {
+  Serial.println("should be blinking");
+  digitalWrite(ledPin, HIGH);
+  delay(timeOn);
+  digitalWrite(ledPin, LOW);
+  delay(timeOn);
+  digitalWrite(ledPin, HIGH);
+  delay(timeOn);
+  digitalWrite(ledPin, LOW);
+}
+
+void light_led(int ledPin) {
+  digitalWrite(alertRed, LOW);
+  digitalWrite(alertBlue, LOW);
+  digitalWrite(alertYellow, LOW);
+  digitalWrite(ledPin, HIGH);
 }
