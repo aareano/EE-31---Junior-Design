@@ -35,19 +35,19 @@ float calcVolts(float analogIn) {
 
 // ******************* PATH FOLLOWING ******************* //
 
-void follow_path(Color pathColor) {
+void follow_path() {
 
   switch (PathState) {
     case PATH_FINDING:
       // Serial.println("path finding...");
-      if (ColorState == pathColor) {
+      if (ColorState == PathToFollow) {
         PathState = ON_PATH;
       }
       forward_slow();
       break;
     case ON_PATH:
       // Serial.println("on path!");
-      if (ColorState != pathColor) { // we've just moved off the path
+      if (ColorState != PathToFollow) { // we've just moved off the path
         PathState = SEARCHING_FIRST_SIDE;
         SearchStartTime = millis();
       }
@@ -58,7 +58,7 @@ void follow_path(Color pathColor) {
       // Serial.print("searching first side - ");
       // Serial.println(SearchSide == SEARCHING_LEFT ? "SEARCHING_LEFT" : "SEARCHING_RIGHT");
 
-      if ((millis() - SearchStartTime > MinSearchTime) && ColorState == pathColor) {
+      if ((millis() - SearchStartTime > MinSearchTime) && ColorState == PathToFollow) {
         // Serial.println("checking for path!!!!!!!!!!!");
         PathState = ON_PATH; // check at the end search time
       }
@@ -80,7 +80,7 @@ void follow_path(Color pathColor) {
       // Serial.print("searching second side - ");
       // Serial.println(SearchSide == SEARCHING_LEFT ? "SEARCHING_LEFT" : "SEARCHING_RIGHT");
 
-      if ((millis() - SearchStartTime > MinSearchTime) && ColorState == pathColor) {
+      if ((millis() - SearchStartTime > MinSearchTime) && ColorState == PathToFollow) {
         PathState = ON_PATH; // check at the end search time
       }
       
