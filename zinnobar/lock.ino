@@ -3,6 +3,11 @@ void check_combo() {
     Serial.print(userCombo[i]);
     Serial.print(", ");
   }
+  Serial.print("  |  ");
+  for (int i = 0; i < comboLength; i++) { 
+    Serial.print(correctCombo[i]);
+    Serial.print(", ");
+  }
   for (int i = 0; i < comboLength; i++) {
     if (correctCombo[i] != userCombo[i]) {
       digitalWrite(alertRed, HIGH);
