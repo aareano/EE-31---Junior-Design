@@ -324,7 +324,6 @@ void service_FR() {
       } break;
       default:
         reverseRight();
-
     }
   } else { // the service is done. change states.
     halt();
@@ -367,8 +366,42 @@ void service_FL_FC() {
   long timeTriggered = FL->timeTriggered > FC->timeTriggered ? FL->timeTriggered : FC->timeTriggered;
   
   if (millis() < timeTriggered + FL_FC->serviceTime) { // service here
-    reverseLeft();
-    
+    switch(MasterSequence[MasterSequenceNum]) {
+      case FIND_WALL: {
+        int reverseTime = 100;
+        int spinTime = 825;
+        if (millis() < timeTriggered + reverseTime) {
+          Serial.println("reverse");
+          reverse();
+        } else if (millis() < timeTriggered + spinTime + reverseTime) {
+          if (BotType == SCARLET_WITCH) {
+            Serial.println("turnRightInPlace");
+            turnRightInPlace();
+          } else {
+            Serial.println("turnLeftInPlace");
+            turnLeftInPlace();
+          }
+        } else {
+          Serial.println("delay, move to next state");
+          halt();
+          drive();
+          MasterSequenceNum++; // finished with this service, move on to the next collision
+          delay(FL_FC->serviceTime - reverseTime + spinTime + 10); // delay to expire service time
+        }
+      } break;
+      case FOLLOW_PATH_2: {
+        Serial.println("Collided with final wall");
+        int reverseTime = 200;
+        if (millis() < timeTriggered + reverseTime) {
+          Serial.println("reverse");
+          reverse();
+        }
+        MasterSequenceNum++;
+        delay(FL_FC->serviceTime - reverseTime + 10);
+      } break;
+      default:
+        reverseLeft();
+    }
   } else { // the service is done. change states (children too).
     FL_FC->state = SERVICED;
     FL->state = UP;
@@ -376,14 +409,47 @@ void service_FL_FC() {
   }
 }
 
-
 void service_FC_FR() {
   // the timeTriggered is the timeTriggered of the child that has the largest (most recent) timeTriggered
   long timeTriggered = FC->timeTriggered > FR->timeTriggered ? FC->timeTriggered : FR->timeTriggered;
   
   if (millis() < timeTriggered + FC_FR->serviceTime) { // service here
-    reverseRight();
-    
+    switch(MasterSequence[MasterSequenceNum]) {
+      case FIND_WALL: {
+        int reverseTime = 100;
+        int spinTime = 825;
+        if (millis() < timeTriggered + reverseTime) {
+          Serial.println("reverse");
+          reverse();
+        } else if (millis() < timeTriggered + spinTime + reverseTime) {
+          if (BotType == SCARLET_WITCH) {
+            Serial.println("turnRightInPlace");
+            turnRightInPlace();
+          } else {
+            Serial.println("turnLeftInPlace");
+            turnLeftInPlace();
+          }
+        } else {
+          Serial.println("delay, move to next state");
+          halt();
+          drive();
+          MasterSequenceNum++; // finished with this service, move on to the next collision
+          delay(FC_FR->serviceTime - reverseTime + spinTime + 10); // delay to expire service time
+        }
+      } break;
+      case FOLLOW_PATH_2: {
+        Serial.println("Collided with final wall");
+        int reverseTime = 200;
+        if (millis() < timeTriggered + reverseTime) {
+          Serial.println("reverse");
+          reverse();
+        }
+        MasterSequenceNum++;
+        delay(FC_FR->serviceTime - reverseTime + 10);
+      } break;
+      default:
+        reverseRight();
+    }
   } else { // the service is done. change states (children too).
     FC_FR->state = SERVICED;
     FC->state = UP;
