@@ -25,6 +25,10 @@ int GATE4 = 11;  // purple
 
 enum MotorName { LEFT, RIGHT };
 
+int time360 = 1475; // ms
+int time180 = 750; // ms
+int forwardSpeed = 32; // ms/s
+
 // optic sensor
 int BLUE_LED = 51;
 
@@ -152,7 +156,8 @@ enum Master {
   FINAL_WAIT, 
   END,
   TEST_TRANSMITTER,
-  TEST_RECEIVER };
+  TEST_RECEIVER,
+  TEST_ROTATION_TIME };
 Master InitializeSequence[] = { LOCKED, SETTINGS, APPLY_SETTINGS };
 Master ScarletWitchSequence[] = { 
   LISTENING_MY_TURN, // listen for 200ms from command center
@@ -174,7 +179,7 @@ Master NightwingSequence[] = {
   FOLLOW_PATH_2,    // follow path to find end 
   FINAL_COLLISION,  // blinks led
   END };
-Master TestBotSequence[] = { TEST_TRANSMITTER, TEST_RECEIVER };
+Master TestBotSequence[] = { TEST_ROTATION_TIME, TEST_TRANSMITTER, TEST_RECEIVER };
 Master *MasterSequence = InitializeSequence; 
 int MasterSequenceNum = 0;
 
@@ -402,6 +407,31 @@ void loop() {
         receive_message();
       }
       break;
+    case TEST_ROTATION_TIME:
+//      turnRightInPlace();
+//      drive();
+//      delay(1475);
+//      halt();
+//      drive();
+//      delay(1000);
+//      turnLeftInPlace();
+//      drive();
+//      delay(750);
+//      halt();
+//      drive();
+//      delay(1000);
+      forward();
+      drive();
+      delay(2000);
+      halt();
+      drive();
+      delay(2000);
+      reverse();
+      drive();
+      delay(2000);
+      halt();
+      drive();
+      delay(2000);
   }
 }
 
