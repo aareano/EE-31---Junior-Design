@@ -50,7 +50,7 @@ Side SearchSide;
 Path PathState;
 long BaseSearchTime = 200;
 long SearchTime = 200;      // this is how long to search for the line on the left or right when we get off of it
-long MinSearchTime = 75;   // the bot needs to turn at least this much before it starts checking for the path again
+long MinSearchTime = 30;   // the bot needs to turn at least this much before it starts checking for the path again
 long SearchStartTime = 0;   // this will be edited when we start searching for the line when we get off of it
 
 enum TurnDirection {L, R};
