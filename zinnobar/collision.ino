@@ -171,6 +171,7 @@ void service_FL() {
         break;
       case SETTINGS:
         FL->serviceTime = 100;
+        Serial.println("Selected SCARLET_WITCH");
         BotType = SCARLET_WITCH;
         MasterSequenceNum++;
         delay(FL->serviceTime + 10);
@@ -184,11 +185,11 @@ void service_FL() {
           reverse();
         } else if (millis() < FL->timeTriggered + time180 + reverseTime) {
           if (BotType == SCARLET_WITCH) {
-            Serial.println("turnRightInPlace");
-            turnRightInPlace();
-          } else {
             Serial.println("turnLeftInPlace");
             turnLeftInPlace();
+          } else {
+            Serial.println("turnRightInPlace");
+            turnRightInPlace();
           }
         } else {
           Serial.println("delay, move to next state");
@@ -210,7 +211,7 @@ void service_FL() {
         delay(FL->serviceTime - reverseTime + 10);
       } break;
       default:
-        FL->serviceTime = 500;
+        FL->serviceTime = 300;
         reverseLeft();
     }
   } else {  // the service is done. change states.
@@ -234,6 +235,7 @@ void service_FC() {
         break;
       case SETTINGS:
         FC->serviceTime = 100;
+        Serial.println("Selected NIGHTWING");
         BotType = NIGHTWING;
         MasterSequenceNum++;
         delay(FC->serviceTime + 10);
@@ -247,11 +249,11 @@ void service_FC() {
           reverse();
         } else if (millis() < FC->timeTriggered + time180 + reverseTime) {
           if (BotType == SCARLET_WITCH) {
-            Serial.println("turnRightInPlace");
-            turnRightInPlace();
-          } else {
             Serial.println("turnLeftInPlace");
             turnLeftInPlace();
+          } else {
+            Serial.println("turnRightInPlace");
+            turnRightInPlace();
           }
         } else {
           Serial.println("delay, move to next state");
@@ -273,8 +275,8 @@ void service_FC() {
         delay(FC->serviceTime - reverseTime + 10);
       } break;
       default:
-        FC->serviceTime = 500;
-        reverse();
+        FC->serviceTime = 300;
+        turnLeftInPlace();
     }
   } else { // the service is done. change states.
     halt();
@@ -296,7 +298,8 @@ void service_FR() {
         break;
       case SETTINGS:
         FC->serviceTime = 100;
-        BotType = TEST_BOT;
+        Serial.println("Selected DANCER");
+        BotType = DANCER;
         MasterSequenceNum++;
         delay(FR->serviceTime + 10);
         break;
@@ -309,11 +312,11 @@ void service_FR() {
           reverse();
         } else if (millis() < FR->timeTriggered + time180 + reverseTime) {
           if (BotType == SCARLET_WITCH) {
-            Serial.println("turnRightInPlace");
-            turnRightInPlace();
-          } else {
             Serial.println("turnLeftInPlace");
             turnLeftInPlace();
+          } else {
+            Serial.println("turnRightInPlace");
+            turnRightInPlace();
           }
         } else {
           Serial.println("delay, move to next state");
@@ -335,7 +338,7 @@ void service_FR() {
         delay(FR->serviceTime - reverseTime + 10);
       } break;
       default:
-        FC->serviceTime = 500;
+        FC->serviceTime = 300;
         reverseRight();
     }
   } else { // the service is done. change states.
@@ -354,7 +357,9 @@ void service_B() {
         break;
       case SETTINGS:
         B->serviceTime = 100;
-        // do nothing - this is not a valid option for settings
+        MasterSequenceNum++;
+        Serial.println("Selected TEST_BOT");
+        BotType = TEST_BOT;
         delay(B->serviceTime + 10);
         break;
       case TEST_TRANSMITTER:
@@ -368,8 +373,8 @@ void service_B() {
         delay(B->serviceTime + 10);
         break;
       default:
-        FC->serviceTime = 500;
-        forward_slow();
+        FC->serviceTime = 300;
+        turnRight();
     }
   } else { // the service is done. change states.
     halt();
@@ -388,17 +393,16 @@ void service_FL_FC() {
       case FIND_WALL: {
         FL_FC->serviceTime = 1000;
         int reverseTime = 100;
-        int spinTime = 825;
         if (millis() < timeTriggered + reverseTime) {
           Serial.println("reverse");
           reverse();
-        } else if (millis() < timeTriggered + spinTime + reverseTime) {
+        } else if (millis() < timeTriggered + time180 + reverseTime) {
           if (BotType == SCARLET_WITCH) {
-            Serial.println("turnRightInPlace");
-            turnRightInPlace();
-          } else {
             Serial.println("turnLeftInPlace");
             turnLeftInPlace();
+          } else {
+            Serial.println("turnRightInPlace");
+            turnRightInPlace();
           }
         } else {
           Serial.println("delay, move to next state");
@@ -406,7 +410,7 @@ void service_FL_FC() {
           halt();
           drive();
           MasterSequenceNum++; // finished with this service, move on to the next collision
-          delay(FL_FC->serviceTime - reverseTime + spinTime + 10); // delay to expire service time
+          delay(FL_FC->serviceTime - reverseTime + time180 + 10); // delay to expire service time
         }
       } break;
       case FOLLOW_PATH_2: {
@@ -421,7 +425,7 @@ void service_FL_FC() {
         delay(FL_FC->serviceTime - reverseTime + 10);
       } break;
       default:
-        FL_FC->serviceTime = 500;
+        FL_FC->serviceTime = 300;
         reverseLeft();
     }
   } else { // the service is done. change states (children too).
@@ -441,24 +445,23 @@ void service_FC_FR() {
       case FIND_WALL: {
         FC_FR->serviceTime = 1000;
         int reverseTime = 100;
-        int spinTime = 825;
         if (millis() < timeTriggered + reverseTime) {
           Serial.println("reverse");
           reverse();
-        } else if (millis() < timeTriggered + spinTime + reverseTime) {
+        } else if (millis() < timeTriggered + time180 + reverseTime) {
           if (BotType == SCARLET_WITCH) {
-            Serial.println("turnRightInPlace");
-            turnRightInPlace();
-          } else {
             Serial.println("turnLeftInPlace");
             turnLeftInPlace();
+          } else {
+            Serial.println("turnRightInPlace");
+            turnRightInPlace();
           }
         } else {
           Serial.println("delay, move to next state");
           halt();
           drive();
           MasterSequenceNum++; // finished with this service, move on to the next collision
-          delay(FC_FR->serviceTime - reverseTime + spinTime + 10); // delay to expire service time
+          delay(FC_FR->serviceTime - reverseTime + time180 + 10); // delay to expire service time
         }
       } break;
       case FOLLOW_PATH_2: {
@@ -473,7 +476,7 @@ void service_FC_FR() {
         delay(FC_FR->serviceTime - reverseTime + 10);
       } break;
       default:
-        FC_FR->serviceTime = 500;
+        FC_FR->serviceTime = 300;
         reverseRight();
     }
   } else { // the service is done. change states (children too).
