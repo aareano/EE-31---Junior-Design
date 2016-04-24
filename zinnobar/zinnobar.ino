@@ -227,7 +227,7 @@ Master *MasterSequence = InitializeSequence;
 int MasterSequenceNum = 0;
 
 enum Bot { SCARLET_WITCH, NIGHTWING, MASTER_DANCER, SLAVE_DANCER, TEST_BOT };  // NIGHTWING goes first, then SCARLET_WITCH
-Bot BotType;21
+Bot BotType;
 
 // the setup routine runs once when you press reset:
 void setup() {
@@ -471,7 +471,7 @@ void loop() {
       Serial.println("ROTATE_RIGHT_180");
       turnRightInPlace();
       drive();
-      delay(get_turn_time(180)); // in motion.ino
+      delay(get_rotate_time(180)); // in motion.ino
       MasterSequenceNum++;
     } break;
     case BACK_3: {
@@ -485,28 +485,28 @@ void loop() {
       Serial.println("TURN_LEFT");
       turnLeft();
       drive();
-      delay(get_turn_time(90)); // 90 degree turn
+      delay(get_rotate_time(90)); // 90 degree turn
       MasterSequenceNum++;
     } break;
     case TURN_RIGHT_1: {
       Serial.println("TURN_RIGHT_1");
       turnRight();
       drive();
-      delay(get_turn_time(90));
+      delay(get_rotate_time(90));
       MasterSequenceNum++;
     } break;
     case TURN_RIGHT_2: {
       Serial.println("TURN_RIGHT_2");
       turnRight();
       drive();
-      delay(get_turn_time(90));
+      delay(get_rotate_time(90));
       MasterSequenceNum++;
     } break;
     case TURN_RIGHT_3: {
       Serial.println("TURN_RIGHT_3");
       turnRight();
       drive();
-      delay(get_turn_time(90));
+      delay(get_rotate_time(90));
       MasterSequenceNum++;
     } break;
                                                   // test --------------------------------
