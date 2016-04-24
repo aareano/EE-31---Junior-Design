@@ -23,7 +23,6 @@ void receive_message() {
     }
     delay(10);
   }
-  Serial.println(millis());
   digitalWrite(commsAlert, LOW);
   Serial.print("pulse count: ");
   Serial.println(pulseCount);
@@ -33,11 +32,8 @@ void receive_message() {
     flash_led(alertRed, 250);
 
     switch(MasterSequence[MasterSequenceNum]) {
-        case LISTENING_MY_TURN:
-          MasterSequence++;   // progress to the next state in the sequence
-          break;
-        case LISTENING_COMPANIONS_TURN:
-          MasterSequence++;
+        case LISTENING_MINE_SCARLET_WITCH:
+          MasterSequenceNum++;
           break;
     }
     
@@ -46,8 +42,11 @@ void receive_message() {
     flash_led(alertYellow, 250);
 
     switch(MasterSequence[MasterSequenceNum]) {
-        case LISTENING_MINE:
-          MasterSequence++;
+        case LISTENING_MY_TURN:
+          MasterSequenceNum++;   // progress to the next state in the sequence
+          break;
+        case FINAL_WAIT:
+          MasterSequenceNum++;
           break;
     }
     
@@ -56,8 +55,42 @@ void receive_message() {
     flash_led(alertBlue, 250);
     
     switch(MasterSequence[MasterSequenceNum]) {
-        case FINAL_WAIT:
-          MasterSequence++;
+        case LISTENING_MINE_NIGHTWING:
+          MasterSequenceNum++;
+          break;
+                                // challenge 2 ---------------------
+        case HALT:
+          MasterSequenceNum++;
+          DanceStepStartTime = millis();
+          NotifyFinishedDanceStep = true;
+          break;
+        case FORWARD_12:
+          MasterSequenceNum++;
+          DanceStepStartTime = millis();
+          NotifyFinishedDanceStep = true;
+          break;
+        case ROTATE_RIGHT_180:
+          MasterSequenceNum++;
+          DanceStepStartTime = millis();
+          NotifyFinishedDanceStep = true;
+          break;
+        case BACK_3:
+          MasterSequenceNum++;
+          DanceStepStartTime = millis();
+          NotifyFinishedDanceStep = true;
+          break;
+        case TURN_LEFT:
+          MasterSequenceNum++;
+          DanceStepStartTime = millis();
+          NotifyFinishedDanceStep = true;
+          break;
+        case TURN_RIGHT_1:
+          MasterSequenceNum++;
+          DanceStepStartTime = millis();
+          NotifyFinishedDanceStep = true;
+          break;
+        case TURN_RIGHT_2:
+          MasterSequenceNum++;
           break;
     }
 
@@ -84,17 +117,22 @@ void send_message(Message message) {
   int offsetMs = 10;
   digitalWrite(commsOut, HIGH);
   switch (message) {
-    case BEGIN:
-      digitalWrite(alertRed, HIGH);
-      delay(200 + offsetMs);
-      digitalWrite(alertRed, LOW);
-      break;
-    case FOUND_MINE:
+    case FOUND_MINE_SCARLET_WITCH:
       digitalWrite(alertYellow, HIGH);
-      delay(300 + offsetMs);
+      delay(200 + offsetMs);
       digitalWrite(alertYellow, LOW);
       break;
-    case FINISHED:
+    case PATH_END:
+      digitalWrite(alertRed, HIGH);
+      delay(300 + offsetMs);
+      digitalWrite(alertRed, LOW);
+      break;
+    case FOUND_MINE_NIGHTWING:
+      digitalWrite(alertBlue, HIGH);
+      delay(400 + offsetMs);
+      digitalWrite(alertBlue, LOW);
+      break;
+    case DANCE:
       digitalWrite(alertBlue, HIGH);
       delay(400 + offsetMs);
       digitalWrite(alertBlue, LOW);
