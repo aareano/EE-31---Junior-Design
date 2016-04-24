@@ -15,9 +15,23 @@ void poll_h_sensor() {
 void service_h_sensor() {
   if (MineState == FOUND) {
     MasterSequenceNum++;
-    send_message(FOUND_MINE);
-    send_message(FOUND_MINE);
+    if (BotType == SCARLET_WITCH) {
+      send_message(FOUND_MINE_SCARLET_WITCH);
+      send_message(FOUND_MINE_SCARLET_WITCH);  
+    } else {
+      send_message(FOUND_MINE_NIGHTWING);
+      send_message(FOUND_MINE_NIGHTWING);  
+    }
   } else if (MineState == NONE) {
     // do nothing
+  }
+}
+
+void service_h_sensor_test() {
+  if (MineState == FOUND) {
+    digitalWrite(alertYellow, HIGH);
+  } else if (MineState == NONE) {
+    // do nothing
+    digitalWrite(alertYellow, LOW);
   }
 }
