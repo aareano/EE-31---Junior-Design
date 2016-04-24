@@ -160,10 +160,12 @@ enum Master {
   
   // challenge 2
   NOTIFY,
+  HALT,
   WAIT,
   FORWARD_12,
   ROTATE_RIGHT_180,   // arbitrary, could be LEFT
   BACK_3,
+  BACK_15,
   TURN_LEFT,
   TURN_RIGHT_1,
   TURN_RIGHT_2,
@@ -200,12 +202,21 @@ Master NightwingSequence[] = {
   QUIET };
 Master MasterDanceSequence[] = {
   FORWARD_12,
+  HALT,
   ROTATE_RIGHT_180, // arbitrary, could be LEFT
+  HALT,
   BACK_3,
+  HALT,
   TURN_LEFT,
+  HALT,
   TURN_RIGHT_1,
+  HALT,
   TURN_RIGHT_2,
+  HALT,
   TURN_RIGHT_3, 
+  HALT,
+  BACK_15,
+  HALT,
   // we are free to add more actions
   NOTIFY,
   QUIET
@@ -213,12 +224,20 @@ Master MasterDanceSequence[] = {
 Master SlaveDanceSequence[] = {
   WAIT,
   FORWARD_12,
+  HALT,
   ROTATE_RIGHT_180, // arbitrary, could be LEFT
+  HALT,
   BACK_3,
+  HALT,
   TURN_LEFT,
+  HALT,
   TURN_RIGHT_1,
+  HALT,
   TURN_RIGHT_2,
-  TURN_RIGHT_3, 
+  HALT,
+  TURN_RIGHT_3,
+  HALT,
+  BACK_15, 
   // we are free to add more actions
   QUIET
 };
@@ -445,7 +464,6 @@ void loop() {
     } break;
                                               // challenge 2 --------------------------------
     case NOTIFY: {
-      Serial.println("NOTIFY");
       halt();
       drive();
       send_message(DANCE);
@@ -460,51 +478,56 @@ void loop() {
         receive_message();
       }
     }
+    case HALT: {
+      halt();
+      drive();
+      delay(2000);
+      MasterSequenceNum++;
+    } break;
     case FORWARD_12: {
-      Serial.println("FORWARD_12");
       forward();
       drive();
       delay(get_drive_time(12));  // get_drive_time is in motion.ino
       MasterSequenceNum++;
     } break;
     case ROTATE_RIGHT_180: {
-      Serial.println("ROTATE_RIGHT_180");
       turnRightInPlace();
       drive();
       delay(get_rotate_time(180)); // in motion.ino
       MasterSequenceNum++;
     } break;
     case BACK_3: {
-      Serial.println("BACK_3");
       reverse();      // reverse() needs to be the same speed as forward()
       drive();
       delay(get_drive_time(3));
       MasterSequenceNum++;
     } break;
+    case BACK_15: {
+      reverse();
+      drive();
+      delay(get_drive_time(15));
+      MasterSequenceNum++;
+    } break;
     case TURN_LEFT: {
-      Serial.println("TURN_LEFT");
-      turnLeft();
+      turnLeftInPlace();
       drive();
       delay(get_rotate_time(90)); // 90 degree turn
       MasterSequenceNum++;
     } break;
     case TURN_RIGHT_1: {
-      Serial.println("TURN_RIGHT_1");
-      turnRight();
+      turnRightInPlace();
       drive();
       delay(get_rotate_time(90));
       MasterSequenceNum++;
     } break;
     case TURN_RIGHT_2: {
-      Serial.println("TURN_RIGHT_2");
-      turnRight();
+      turnRightInPlace();
       drive();
       delay(get_rotate_time(90));
       MasterSequenceNum++;
     } break;
     case TURN_RIGHT_3: {
-      Serial.println("TURN_RIGHT_3");
-      turnRight();
+      turnRightInPlace();
       drive();
       delay(get_rotate_time(90));
       MasterSequenceNum++;
