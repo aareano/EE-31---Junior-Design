@@ -48,8 +48,8 @@ enum Side { SEARCHING_LEFT, SEARCHING_RIGHT };
 Color PathToFollow;
 Side SearchSide;
 Path PathState;
-long BaseSearchTime = 500;  // this value is later lowered to 100
-long SearchTime = 500;      // this is how long to search for the line on the left or right when we get off of it
+long BaseSearchTime = 300;  // this value is later lowered to 100
+long SearchTime = 300;      // this is how long to search for the line on the left or right when we get off of it
 long MinSearchTime = 50;    // the bot needs to turn at least this much before it starts checking for the path again
 long SearchStartTime = 0;   // this will be edited when we start searching for the line when we get off of it
 
