@@ -199,19 +199,8 @@ void service_FL() {
           delay(FL->serviceTime - reverseTime + time180 + 10); // delay to expire service time
         }
       } break;
-      case FOLLOW_PATH_2: {
-        FL->serviceTime = 300;
-        Serial.println("Collided with final wall");
-        int reverseTime = 200;
-        if (millis() < FL->timeTriggered + reverseTime) {
-          Serial.println("reverse");
-          reverse();
-        }
-        MasterSequenceNum++;
-        delay(FL->serviceTime - reverseTime + 10);
-      } break;
       default:
-        FL->serviceTime = 300;
+        FL->serviceTime = 400;
         reverseLeft();
     }
   } else {  // the service is done. change states.
@@ -275,7 +264,7 @@ void service_FC() {
         delay(FC->serviceTime - reverseTime + 10);
       } break;
       default:
-        FC->serviceTime = 300;
+        FC->serviceTime = 400;
         turnLeftInPlace();
     }
   } else { // the service is done. change states.
@@ -326,19 +315,8 @@ void service_FR() {
           delay(FL->serviceTime - reverseTime + time180 + 10); // delay to expire service time
         }
       } break;
-      case FOLLOW_PATH_2: {
-        Serial.println("Collided with final wall");
-        FC->serviceTime = 300;
-        int reverseTime = 200;
-        if (millis() < FR->timeTriggered + reverseTime) {
-          Serial.println("reverse");
-          reverse();
-        }
-        MasterSequenceNum++;
-        delay(FR->serviceTime - reverseTime + 10);
-      } break;
       default:
-        FC->serviceTime = 300;
+        FC->serviceTime = 400;
         reverseRight();
     }
   } else { // the service is done. change states.
@@ -373,7 +351,7 @@ void service_B() {
         delay(B->serviceTime + 10);
         break;
       default:
-        FC->serviceTime = 300;
+        FC->serviceTime = 400;
         turnRight();
     }
   } else { // the service is done. change states.
@@ -425,7 +403,7 @@ void service_FL_FC() {
         delay(FL_FC->serviceTime - reverseTime + 10);
       } break;
       default:
-        FL_FC->serviceTime = 300;
+        FL_FC->serviceTime = 400;
         reverseLeft();
     }
   } else { // the service is done. change states (children too).
@@ -476,7 +454,7 @@ void service_FC_FR() {
         delay(FC_FR->serviceTime - reverseTime + 10);
       } break;
       default:
-        FC_FR->serviceTime = 300;
+        FC_FR->serviceTime = 400;
         reverseRight();
     }
   } else { // the service is done. change states (children too).
