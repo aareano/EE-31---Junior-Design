@@ -27,7 +27,7 @@ void receive_message() {
   Serial.print("pulse count: ");
   Serial.println(pulseCount);
   
-  if (pulseCount >= 17 && pulseCount <= 23) {
+  if (pulseCount >= 14 && pulseCount <= 24) {
     Serial.println("received 200 ms message");
     flash_led(alertRed, 250);
 
@@ -35,30 +35,7 @@ void receive_message() {
         case LISTENING_MINE_SCARLET_WITCH:
           MasterSequenceNum++;
           break;
-    }
-    
-  } else if (pulseCount >= 27 && pulseCount <= 33) {
-    Serial.println("received 300 ms message");
-    flash_led(alertYellow, 250);
-
-    switch(MasterSequence[MasterSequenceNum]) {
-        case LISTENING_MY_TURN:
-          MasterSequenceNum++;   // progress to the next state in the sequence
-          break;
-        case FINAL_WAIT:
-          MasterSequenceNum++;
-          break;
-    }
-    
-  } else if (pulseCount >= 37 && pulseCount <= 43) {
-    Serial.println("received 400 ms message");
-    flash_led(alertBlue, 250);
-    
-    switch(MasterSequence[MasterSequenceNum]) {
-        case LISTENING_MINE_NIGHTWING:
-          MasterSequenceNum++;
-          break;
-                                // challenge 2 ---------------------
+                                        // challenge 2 ---------------------
         case HALT:
           MasterSequenceNum++;
           DanceStepStartTime = millis();
@@ -90,6 +67,29 @@ void receive_message() {
           NotifyFinishedDanceStep = true;
           break;
         case TURN_RIGHT_2:
+          MasterSequenceNum++;
+          break;
+    }
+    
+  } else if (pulseCount >= 26 && pulseCount <= 34) {
+    Serial.println("received 300 ms message");
+    flash_led(alertYellow, 250);
+
+    switch(MasterSequence[MasterSequenceNum]) {
+        case LISTENING_MY_TURN:
+          MasterSequenceNum++;   // progress to the next state in the sequence
+          break;
+        case FINAL_WAIT:
+          MasterSequenceNum++;
+          break;
+    }
+    
+  } else if (pulseCount >= 36 && pulseCount <= 44) {
+    Serial.println("received 400 ms message");
+    flash_led(alertBlue, 250);
+    
+    switch(MasterSequence[MasterSequenceNum]) {
+        case LISTENING_MINE_NIGHTWING:
           MasterSequenceNum++;
           break;
     }
