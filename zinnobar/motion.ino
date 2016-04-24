@@ -24,7 +24,7 @@ long get_drive_time(float inches) {
 }
 
 long get_rotate_time(int degrees) {
-  int timePerDegree = 4.1; // ms
+  int timePerDegree = 3.6; // ms
   return timePerDegree * degrees;
 }
 
@@ -32,13 +32,13 @@ long get_rotate_time(int degrees) {
 // These functions just set the motor speeds, without calling drive(), nothing happens. 
 
 void forward() {
-    rightMotorSpeed = 35;
-    leftMotorSpeed = 35;
+    rightMotorSpeed = 25;
+    leftMotorSpeed = 25;
 }
 
 void reverse() {
-    rightMotorSpeed = -35;
-    leftMotorSpeed = -35;
+    rightMotorSpeed = -25;
+    leftMotorSpeed = -25;
 }
 
 void reverseRight() {
