@@ -18,13 +18,13 @@ void drive() {
 }
 
 long get_drive_time(float inches) {
-  float forwardSpeed = 13; // in/s    // you made need to adjust this constant based on batteries and PWM speed
+  float forwardSpeed = 7.75; // in/s    // you made need to adjust this constant based on batteries and PWM speed
   float seconds = inches / forwardSpeed;
   return (long) 1000*seconds; // ms
 }
 
 long get_rotate_time(int degrees) {
-  int timePerDegree = 3.6; // ms    // you made need to adjust this constant based on batteries and PWM speed
+  int timePerDegree = 4.95; // ms    // you made need to adjust this constant based on batteries and PWM speed
   return timePerDegree * degrees;
 }
 
@@ -89,7 +89,7 @@ void turnMotor(MotorName mName, int highPin, int lowPin, float dutyCycle) {
     int offset = dutyCycle == 0 ? 0 : 0;
     highPWM = calcPWM(roundPWM(dutyCycle + offset, 15, 85));
   } else {
-    int offset = dutyCycle == 0 ? 0 : 0; // 0 offset either way
+    int offset = dutyCycle == 0 ? 0 : 3; // 0 offset either way
     highPWM = calcPWM(roundPWM(dutyCycle + offset, 15, 85));
   }
 
