@@ -183,7 +183,7 @@ void service_FL() {
         if (millis() < FL->timeTriggered + reverseTime) {
           Serial.println("reverse");
           reverse();
-        } else if (millis() < FL->timeTriggered + time180 + reverseTime) {
+        } else if (millis() < FL->timeTriggered + get_rotate_time(150) + reverseTime) {
           if (BotType == SCARLET_WITCH) {
             Serial.println("turnLeftInPlace");
             turnLeftInPlace();
@@ -196,11 +196,11 @@ void service_FL() {
           halt();
           drive();
           MasterSequenceNum++;  // finished with this service, move on to the next collision
-          delay(FL->serviceTime - reverseTime + time180 + 10); // delay to expire service time
+          delay(FL->serviceTime - reverseTime + get_rotate_time(150) + 10); // delay to expire service time
         }
       } break;
       default:
-        FL->serviceTime = 400;
+        FL->serviceTime = 300;
         reverseLeft();
     }
   } else {  // the service is done. change states.
@@ -236,7 +236,7 @@ void service_FC() {
         if (millis() < FC->timeTriggered + reverseTime) {
           Serial.println("reverse");
           reverse();
-        } else if (millis() < FC->timeTriggered + time180 + reverseTime) {
+        } else if (millis() < FC->timeTriggered + get_rotate_time(150) + reverseTime) {
           if (BotType == SCARLET_WITCH) {
             Serial.println("turnLeftInPlace");
             turnLeftInPlace();
@@ -249,22 +249,26 @@ void service_FC() {
           halt();
           drive();
           MasterSequenceNum++; // finished with this service, move on to the next collision
-          delay(FL->serviceTime - reverseTime + time180 + 10); // delay to expire service time
+          delay(FL->serviceTime - reverseTime + get_rotate_time(150) + 10); // delay to expire service time
         }
       } break;
       case FOLLOW_PATH_2: {
-        FC->serviceTime = 300;
+        FC->serviceTime = 800;
         Serial.println("Collided with final wall");
-        int reverseTime = 200;
+        int reverseTime = 800;
         if (millis() < FC->timeTriggered + reverseTime) {
           Serial.println("reverse");
           reverse();
+        } else {
+          Serial.println("delay, move to next state");
+          halt();
+          drive();
+          MasterSequenceNum++;
+          delay(FC->serviceTime - reverseTime + 10);
         }
-        MasterSequenceNum++;
-        delay(FC->serviceTime - reverseTime + 10);
       } break;
       default:
-        FC->serviceTime = 400;
+        FC->serviceTime = 300;
         turnLeftInPlace();
     }
   } else { // the service is done. change states.
@@ -299,7 +303,7 @@ void service_FR() {
         if (millis() < FR->timeTriggered + reverseTime) {
           Serial.println("reverse");
           reverse();
-        } else if (millis() < FR->timeTriggered + time180 + reverseTime) {
+        } else if (millis() < FR->timeTriggered + get_rotate_time(150) + reverseTime) {
           if (BotType == SCARLET_WITCH) {
             Serial.println("turnLeftInPlace");
             turnLeftInPlace();
@@ -312,11 +316,11 @@ void service_FR() {
           halt();
           drive();
           MasterSequenceNum++; // finished with this service, move on to the next collision
-          delay(FL->serviceTime - reverseTime + time180 + 10); // delay to expire service time
+          delay(FL->serviceTime - reverseTime + get_rotate_time(150) + 10); // delay to expire service time
         }
       } break;
       default:
-        FC->serviceTime = 400;
+        FC->serviceTime = 300;
         reverseRight();
     }
   } else { // the service is done. change states.
@@ -351,7 +355,7 @@ void service_B() {
         delay(B->serviceTime + 10);
         break;
       default:
-        FC->serviceTime = 400;
+        FC->serviceTime = 300;
         turnRight();
     }
   } else { // the service is done. change states.
@@ -374,7 +378,7 @@ void service_FL_FC() {
         if (millis() < timeTriggered + reverseTime) {
           Serial.println("reverse");
           reverse();
-        } else if (millis() < timeTriggered + time180 + reverseTime) {
+        } else if (millis() < timeTriggered + get_rotate_time(150) + reverseTime) {
           if (BotType == SCARLET_WITCH) {
             Serial.println("turnLeftInPlace");
             turnLeftInPlace();
@@ -388,22 +392,26 @@ void service_FL_FC() {
           halt();
           drive();
           MasterSequenceNum++; // finished with this service, move on to the next collision
-          delay(FL_FC->serviceTime - reverseTime + time180 + 10); // delay to expire service time
+          delay(FL_FC->serviceTime - reverseTime + get_rotate_time(150) + 10); // delay to expire service time
         }
       } break;
       case FOLLOW_PATH_2: {
         Serial.println("Collided with final wall");
         FL_FC->serviceTime = 300;
-        int reverseTime = 200;
+        int reverseTime = 300;
         if (millis() < timeTriggered + reverseTime) {
           Serial.println("reverse");
-          reverse();
+          reverseRight();
+        } else {
+          Serial.println("delay, move to next state");
+          halt();
+          drive();
+          MasterSequenceNum++;
+          delay(FC->serviceTime - reverseTime + 10);
         }
-        MasterSequenceNum++;
-        delay(FL_FC->serviceTime - reverseTime + 10);
       } break;
       default:
-        FL_FC->serviceTime = 400;
+        FL_FC->serviceTime = 300;
         reverseLeft();
     }
   } else { // the service is done. change states (children too).
@@ -426,7 +434,7 @@ void service_FC_FR() {
         if (millis() < timeTriggered + reverseTime) {
           Serial.println("reverse");
           reverse();
-        } else if (millis() < timeTriggered + time180 + reverseTime) {
+        } else if (millis() < timeTriggered + get_rotate_time(150) + reverseTime) {
           if (BotType == SCARLET_WITCH) {
             Serial.println("turnLeftInPlace");
             turnLeftInPlace();
@@ -439,22 +447,26 @@ void service_FC_FR() {
           halt();
           drive();
           MasterSequenceNum++; // finished with this service, move on to the next collision
-          delay(FC_FR->serviceTime - reverseTime + time180 + 10); // delay to expire service time
+          delay(FC_FR->serviceTime - reverseTime + get_rotate_time(150) + 10); // delay to expire service time
         }
       } break;
       case FOLLOW_PATH_2: {
         Serial.println("Collided with final wall");
-        FC_FR->serviceTime = 300;
-        int reverseTime = 200;
+        FC_FR->serviceTime = 500;
+        int reverseTime = 500;
         if (millis() < timeTriggered + reverseTime) {
           Serial.println("reverse");
-          reverse();
+          reverseLeft();
+        } else {
+          Serial.println("delay, move to next state");
+          halt();
+          drive();
+          MasterSequenceNum++;
+          delay(FC->serviceTime - reverseTime + 10);
         }
-        MasterSequenceNum++;
-        delay(FC_FR->serviceTime - reverseTime + 10);
       } break;
       default:
-        FC_FR->serviceTime = 400;
+        FC_FR->serviceTime = 300;
         reverseRight();
     }
   } else { // the service is done. change states (children too).
