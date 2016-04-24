@@ -2,7 +2,6 @@
 // ******************* MOTION CONTROL ******************* //
 // The convenience functions tell the motors what we want, drive() makes the motors do it
 
-
 // sets motors to drive at their respective speed/direction
 void drive() {
   if (rightMotorSpeed > 0) {
@@ -18,32 +17,38 @@ void drive() {
   } 
 }
 
+long get_drive_time(float inches) {
+  float forwardSpeed = 13; // in/s
+  float seconds = inches / forwardSpeed;
+  return (long) 1000*seconds; // ms
+}
+
+long get_rotate_time(int degrees) {
+  int timePerDegree = 4.1; // ms
+  return timePerDegree * degrees;
+}
+
         // ***** MOTION CONVENIENCE FUNCTIONS ***** //
 // These functions just set the motor speeds, without calling drive(), nothing happens. 
 
 void forward() {
-    rightMotorSpeed = 50;
-    leftMotorSpeed = 50;
-}
-
-void forward_slow() {
-    rightMotorSpeed = 25;
-    leftMotorSpeed = 25;
+    rightMotorSpeed = 35;
+    leftMotorSpeed = 35;
 }
 
 void reverse() {
-    rightMotorSpeed = -50;
-    leftMotorSpeed = -50;
+    rightMotorSpeed = -35;
+    leftMotorSpeed = -35;
 }
 
 void reverseRight() {
-    rightMotorSpeed = -50;
-    leftMotorSpeed = -15;
+    rightMotorSpeed = 0;
+    leftMotorSpeed = -35;
 }
 
 void reverseLeft() {
-    rightMotorSpeed = -15;
-    leftMotorSpeed = -50;
+    rightMotorSpeed = -35;
+    leftMotorSpeed = 0;
 }
 
 void halt() {
@@ -53,7 +58,7 @@ void halt() {
 
 void turnRight() {
   rightMotorSpeed = 0;
-  leftMotorSpeed = 50;
+  leftMotorSpeed = 35;
 }
 
 void turnRightInPlace() {
@@ -62,7 +67,7 @@ void turnRightInPlace() {
 }
 
 void turnLeft() {
-  rightMotorSpeed = 50;
+  rightMotorSpeed = 35;
   leftMotorSpeed = 0;
 }
 
@@ -81,10 +86,10 @@ void turnMotor(MotorName mName, int highPin, int lowPin, float dutyCycle) {
   int lowPWM = 0;
   
   if (mName == RIGHT) {
-    int offset = 0;
+    int offset = dutyCycle == 0 ? 0 : 0;
     highPWM = calcPWM(roundPWM(dutyCycle + offset, 15, 85));
   } else {
-    int offset = 0;
+    int offset = dutyCycle == 0 ? 0 : 0; // 0 offset either way
     highPWM = calcPWM(roundPWM(dutyCycle + offset, 15, 85));
   }
 
@@ -134,5 +139,7 @@ int roundPWM(int PWM, int localMin, int localMax) {
   } else if (localMax < PWM && PWM < 100) {   // set local maxiumum
     PWM = localMax;
   }
+  PWM = PWM > 100 ? 100 : PWM;    // sanity check
+  PWM = PWM < 0 ? 0 : PWM;
   return PWM;
 }
