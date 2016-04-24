@@ -35,38 +35,7 @@ void receive_message() {
         case LISTENING_MINE_SCARLET_WITCH:
           MasterSequenceNum++;
           break;
-                                        // challenge 2 ---------------------
-        case HALT:
-          MasterSequenceNum++;
-          DanceStepStartTime = millis();
-          NotifyFinishedDanceStep = true;
-          break;
-        case FORWARD_12:
-          MasterSequenceNum++;
-          DanceStepStartTime = millis();
-          NotifyFinishedDanceStep = true;
-          break;
-        case ROTATE_RIGHT_180:
-          MasterSequenceNum++;
-          DanceStepStartTime = millis();
-          NotifyFinishedDanceStep = true;
-          break;
-        case BACK_3:
-          MasterSequenceNum++;
-          DanceStepStartTime = millis();
-          NotifyFinishedDanceStep = true;
-          break;
-        case TURN_LEFT:
-          MasterSequenceNum++;
-          DanceStepStartTime = millis();
-          NotifyFinishedDanceStep = true;
-          break;
-        case TURN_RIGHT_1:
-          MasterSequenceNum++;
-          DanceStepStartTime = millis();
-          NotifyFinishedDanceStep = true;
-          break;
-        case TURN_RIGHT_2:
+        case WAIT:
           MasterSequenceNum++;
           break;
     }

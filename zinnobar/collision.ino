@@ -291,8 +291,8 @@ void service_FR() {
         break;
       case SETTINGS:
         FC->serviceTime = 100;
-        Serial.println("Selected DANCER");
-        BotType = DANCER;
+        Serial.println("Selected MASTER_DANCER");
+        BotType = MASTER_DANCER;
         MasterSequenceNum++;
         delay(FR->serviceTime + 10);
         break;
@@ -340,8 +340,8 @@ void service_B() {
       case SETTINGS:
         B->serviceTime = 100;
         MasterSequenceNum++;
-        Serial.println("Selected TEST_BOT");
-        BotType = TEST_BOT;
+        Serial.println("Selected SLAVE_DANCER");
+        BotType = SLAVE_DANCER;
         delay(B->serviceTime + 10);
         break;
       case TEST_TRANSMITTER:

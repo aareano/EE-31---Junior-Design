@@ -197,31 +197,38 @@ Master NightwingSequence[] = {
   FINAL_COLLISION,  // sends 300 ms, blinks led
   END,
   QUIET };
-Master DanceSequence[] = {
-  HALT,
+Master MasterDanceSequence[] = {
+  NOTIFY,
   FORWARD_12,
-  HALT,
   ROTATE_RIGHT_180, // arbitrary, could be LEFT
-  HALT,
   BACK_3,
-  HALT,
   TURN_LEFT,
   TURN_RIGHT_1,
   TURN_RIGHT_2,
   TURN_RIGHT_3, 
   // we are free to add more actions
+  WAIT,
+  QUIET
+};
+Master SlaveDanceSequence[] = {
+  WAIT,
+  FORWARD_12,
+  ROTATE_RIGHT_180, // arbitrary, could be LEFT
+  BACK_3,
+  TURN_LEFT,
+  TURN_RIGHT_1,
+  TURN_RIGHT_2,
+  TURN_RIGHT_3, 
+  // we are free to add more actions
+  NOTIFY,
   QUIET
 };
 Master TestBotSequence[] = { TEST_HALL_EFFECT, TEST_COLOR_DETECTION, TEST_ROTATION_TIME, TEST_TRANSMITTER, TEST_RECEIVER };
 Master *MasterSequence = InitializeSequence; 
 int MasterSequenceNum = 0;
 
-enum Bot { SCARLET_WITCH, NIGHTWING, DANCER, TEST_BOT };  // NIGHTWING goes first, then SCARLET_WITCH
-Bot BotType;
-
-// dance routine
-long DanceStepStartTime = 0;
-boolean NotifyFinishedDanceStep = true;
+enum Bot { SCARLET_WITCH, NIGHTWING, MASTER_DANCER, SLAVE_DANCER, TEST_BOT };  // NIGHTWING goes first, then SCARLET_WITCH
+Bot BotType;21
 
 // the setup routine runs once when you press reset:
 void setup() {
@@ -311,15 +318,14 @@ void loop() {
           PathToFollow = BLUE;
           flash_led(alertBlue, 100);
           break;
-        case DANCER:
-          MasterSequence = DanceSequence;
+        case MASTER_DANCER:
+          MasterSequence = MasterDanceSequence;
           MasterSequenceNum = 0;
           flash_led(alertYellow, 100);
           break;
-        case TEST_BOT:
-          MasterSequence = TestBotSequence;
+        case SLAVE_DANCER:
+          MasterSequence = SlaveDanceSequence;
           MasterSequenceNum = 0;
-          PathToFollow = RED;
           flash_led(alertRed, 50);
           flash_led(alertYellow, 50);
           flash_led(alertBlue, 50);
@@ -439,55 +445,70 @@ void loop() {
       drive();
     } break;
                                               // challenge 2 --------------------------------
-    case HALT: {
-      Serial.println("HALT");             
+    case NOTIFY: {
+      Serial.println("NOTIFY");
       halt();
       drive();
-      listen_for_message();
+      send_message(DANCE);
+      send_message(DANCE);
+      MasterSequenceNum++;
     } break;
+    case WAIT: {
+      if (CommsState == COMMS_LISTENING) {
+        poll_comms();
+      }
+      if (CommsState == COMMS_RECEIVING) {
+        receive_message();
+      }
+    }
     case FORWARD_12: {
       Serial.println("FORWARD_12");
       forward();
       drive();
-      listen_for_message();
+      delay(get_drive_time(12));  // get_drive_time is in motion.ino
+      MasterSequenceNum++;
     } break;
     case ROTATE_RIGHT_180: {
       Serial.println("ROTATE_RIGHT_180");
       turnRightInPlace();
-      listen_for_message();
       drive();
+      delay(get_turn_time(180)); // in motion.ino
+      MasterSequenceNum++;
     } break;
     case BACK_3: {
       Serial.println("BACK_3");
-      reverse();
-      listen_for_message();
+      reverse();      // reverse() needs to be the same speed as forward()
       drive();
+      delay(get_drive_time(3));
+      MasterSequenceNum++;
     } break;
     case TURN_LEFT: {
       Serial.println("TURN_LEFT");
       turnLeft();
-      listen_for_message();
       drive();
+      delay(get_turn_time(90)); // 90 degree turn
+      MasterSequenceNum++;
     } break;
     case TURN_RIGHT_1: {
       Serial.println("TURN_RIGHT_1");
-      long danceStepTime = 1000; // ms
       turnRight();
-      listen_for_message();
       drive();
+      delay(get_turn_time(90));
+      MasterSequenceNum++;
     } break;
     case TURN_RIGHT_2: {
       Serial.println("TURN_RIGHT_2");
-      long danceStepTime = 1000; // ms
       turnRight();
-      listen_for_message();
       drive();
+      delay(get_turn_time(90));
+      MasterSequenceNum++;
     } break;
     case TURN_RIGHT_3: {
       Serial.println("TURN_RIGHT_3");
       turnRight();
-      listen_for_message();
       drive();
+      delay(get_turn_time(90));
+      MasterSequenceNum++;
     } break;
                                                   // test --------------------------------
     case TEST_TRANSMITTER:          // send each message, indicated with LEDs
@@ -547,21 +568,6 @@ void loop() {
       detect_color();
       follow_path();
       break;
-  }
-}
-
-void notify_finished() {
-  send_message(DANCE); // 400 ms
-  send_message(DANCE);
-  NotifyFinishedDanceStep = false;
-}
-
-void listen_for_message() {
-  if (CommsState == COMMS_LISTENING) {
-    poll_comms();
-  }
-  if (CommsState == COMMS_RECEIVING) {
-    receive_message();
   }
 }
 
