@@ -443,110 +443,49 @@ void loop() {
       Serial.println("HALT");             
       halt();
       drive();
-      if (NotifyFinishedDanceStep) {
-        notify_finished();
-      }
       listen_for_message();
     } break;
     case FORWARD_12: {
       Serial.println("FORWARD_12");
-      if (millis() < DanceStepStartTime + get_drive_time(12)) {
-        forward();
-        drive();
-      } else {
-        halt();
-        drive();
-        if (NotifyFinishedDanceStep) {
-          notify_finished();
-        }
-      }
+      forward();
+      drive();
       listen_for_message();
     } break;
     case ROTATE_RIGHT_180: {
       Serial.println("ROTATE_RIGHT_180");
-      if (millis() < DanceStepStartTime + get_rotate_time(180)) {
-        turnRightInPlace();
-      } else {
-        halt();
-        drive();
-        if (NotifyFinishedDanceStep) {
-          notify_finished();
-        }
-      }
+      turnRightInPlace();
       listen_for_message();
       drive();
     } break;
     case BACK_3: {
       Serial.println("BACK_3");
-      if (millis() < DanceStepStartTime + get_drive_time(3)) {
-        reverse();
-      } else {
-        halt();
-        drive();
-        if (NotifyFinishedDanceStep) {
-          notify_finished();
-        }
-      }
+      reverse();
       listen_for_message();
       drive();
     } break;
     case TURN_LEFT: {
       Serial.println("TURN_LEFT");
-      long danceStepTime = 2000; // ms
-      if (millis() < DanceStepStartTime + danceStepTime) {
-        turnLeft();
-      } else {
-        halt();
-        drive();
-        if (NotifyFinishedDanceStep) {
-          notify_finished();
-        }
-      }
+      turnLeft();
       listen_for_message();
       drive();
     } break;
     case TURN_RIGHT_1: {
       Serial.println("TURN_RIGHT_1");
       long danceStepTime = 1000; // ms
-      if (millis() < DanceStepStartTime + danceStepTime) {
-        turnRight();
-      } else {
-        halt();
-        drive();
-        if (NotifyFinishedDanceStep) {
-          notify_finished();
-        }
-      }
+      turnRight();
       listen_for_message();
       drive();
     } break;
     case TURN_RIGHT_2: {
       Serial.println("TURN_RIGHT_2");
       long danceStepTime = 1000; // ms
-      if (millis() < DanceStepStartTime + danceStepTime) {
-        turnRight();
-      } else {
-        halt();
-        drive();
-        if (NotifyFinishedDanceStep) {
-          notify_finished();
-        }
-      }
+      turnRight();
       listen_for_message();
       drive();
     } break;
     case TURN_RIGHT_3: {
       Serial.println("TURN_RIGHT_3");
-      long danceStepTime = 1000; // ms
-      if (millis() < DanceStepStartTime + danceStepTime) {
-        turnRight();
-      } else {
-        halt();
-        drive();
-        if (NotifyFinishedDanceStep) {
-          notify_finished();
-        }
-      }
+      turnRight();
       listen_for_message();
       drive();
     } break;
