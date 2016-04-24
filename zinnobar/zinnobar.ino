@@ -159,7 +159,8 @@ enum Master {
   QUIET,
   
   // challenge 2
-  HALT,
+  NOTIFY,
+  WAIT,
   FORWARD_12,
   ROTATE_RIGHT_180,   // arbitrary, could be LEFT
   BACK_3,
@@ -198,7 +199,6 @@ Master NightwingSequence[] = {
   END,
   QUIET };
 Master MasterDanceSequence[] = {
-  NOTIFY,
   FORWARD_12,
   ROTATE_RIGHT_180, // arbitrary, could be LEFT
   BACK_3,
@@ -207,7 +207,7 @@ Master MasterDanceSequence[] = {
   TURN_RIGHT_2,
   TURN_RIGHT_3, 
   // we are free to add more actions
-  WAIT,
+  NOTIFY,
   QUIET
 };
 Master SlaveDanceSequence[] = {
@@ -220,7 +220,6 @@ Master SlaveDanceSequence[] = {
   TURN_RIGHT_2,
   TURN_RIGHT_3, 
   // we are free to add more actions
-  NOTIFY,
   QUIET
 };
 Master TestBotSequence[] = { TEST_HALL_EFFECT, TEST_COLOR_DETECTION, TEST_ROTATION_TIME, TEST_TRANSMITTER, TEST_RECEIVER };
