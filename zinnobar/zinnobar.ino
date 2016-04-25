@@ -471,6 +471,8 @@ void loop() {
       MasterSequenceNum++;
     } break;
     case WAIT: {
+      halt();
+      drive();
       if (CommsState == COMMS_LISTENING) {
         poll_comms();
       }
