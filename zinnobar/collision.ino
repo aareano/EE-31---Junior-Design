@@ -178,12 +178,12 @@ void service_FL() {
         break;
       case FIND_WALL: {
         Serial.println("collided with wall");
-        FL->serviceTime = 1000;
+        FL->serviceTime = get_rotate_time(190) + 500;
         int reverseTime = 100;
         if (millis() < FL->timeTriggered + reverseTime) {
           Serial.println("reverse");
           reverse();
-        } else if (millis() < FL->timeTriggered + get_rotate_time(150) + reverseTime) {
+        } else if (millis() < FL->timeTriggered + get_rotate_time(190) + reverseTime) {
           if (BotType == SCARLET_WITCH) {
             Serial.println("turnLeftInPlace");
             turnLeftInPlace();
@@ -196,7 +196,7 @@ void service_FL() {
           halt();
           drive();
           MasterSequenceNum++;  // finished with this service, move on to the next collision
-          delay(FL->serviceTime - reverseTime + get_rotate_time(150) + 10); // delay to expire service time
+          delay(FL->serviceTime - reverseTime + get_rotate_time(190) + 10); // delay to expire service time
         }
       } break;
       default:
@@ -231,12 +231,12 @@ void service_FC() {
         break;
       case FIND_WALL: {
         Serial.println("collided with wall");
-        FC->serviceTime = 1000;
+        FC->serviceTime = get_rotate_time(190) + 500;
         int reverseTime = 100;
         if (millis() < FC->timeTriggered + reverseTime) {
           Serial.println("reverse");
           reverse();
-        } else if (millis() < FC->timeTriggered + get_rotate_time(150) + reverseTime) {
+        } else if (millis() < FC->timeTriggered + get_rotate_time(190) + reverseTime) {
           if (BotType == SCARLET_WITCH) {
             Serial.println("turnLeftInPlace");
             turnLeftInPlace();
@@ -249,16 +249,16 @@ void service_FC() {
           halt();
           drive();
           MasterSequenceNum++; // finished with this service, move on to the next collision
-          delay(FL->serviceTime - reverseTime + get_rotate_time(150) + 10); // delay to expire service time
+          delay(FL->serviceTime - reverseTime + get_rotate_time(190) + 10); // delay to expire service time
         }
       } break;
       case FOLLOW_PATH_2: {
-        FC->serviceTime = 800;
+        FC->serviceTime = 1000;
         Serial.println("Collided with final wall");
         int reverseTime = 800;
         if (millis() < FC->timeTriggered + reverseTime) {
           Serial.println("reverse");
-          reverse();
+          reverseLeft();
         } else {
           Serial.println("delay, move to next state");
           halt();
@@ -298,12 +298,12 @@ void service_FR() {
         break;
       case FIND_WALL: {
         Serial.println("collided with wall");
-        FC->serviceTime = 1000;
+        FC->serviceTime = get_rotate_time(190) + 500;
         int reverseTime = 100;
         if (millis() < FR->timeTriggered + reverseTime) {
           Serial.println("reverse");
           reverse();
-        } else if (millis() < FR->timeTriggered + get_rotate_time(150) + reverseTime) {
+        } else if (millis() < FR->timeTriggered + get_rotate_time(190) + reverseTime) {
           if (BotType == SCARLET_WITCH) {
             Serial.println("turnLeftInPlace");
             turnLeftInPlace();
@@ -316,7 +316,7 @@ void service_FR() {
           halt();
           drive();
           MasterSequenceNum++; // finished with this service, move on to the next collision
-          delay(FL->serviceTime - reverseTime + get_rotate_time(150) + 10); // delay to expire service time
+          delay(FL->serviceTime - reverseTime + get_rotate_time(190) + 10); // delay to expire service time
         }
       } break;
       default:
@@ -373,12 +373,12 @@ void service_FL_FC() {
   if (millis() < timeTriggered + FL_FC->serviceTime) { // service here
     switch(MasterSequence[MasterSequenceNum]) {
       case FIND_WALL: {
-        FL_FC->serviceTime = 1000;
+        FL_FC->serviceTime = get_rotate_time(190) + 500;
         int reverseTime = 100;
         if (millis() < timeTriggered + reverseTime) {
           Serial.println("reverse");
           reverse();
-        } else if (millis() < timeTriggered + get_rotate_time(150) + reverseTime) {
+        } else if (millis() < timeTriggered + get_rotate_time(190) + reverseTime) {
           if (BotType == SCARLET_WITCH) {
             Serial.println("turnLeftInPlace");
             turnLeftInPlace();
@@ -392,12 +392,12 @@ void service_FL_FC() {
           halt();
           drive();
           MasterSequenceNum++; // finished with this service, move on to the next collision
-          delay(FL_FC->serviceTime - reverseTime + get_rotate_time(150) + 10); // delay to expire service time
+          delay(FL_FC->serviceTime - reverseTime + get_rotate_time(190) + 10); // delay to expire service time
         }
       } break;
       case FOLLOW_PATH_2: {
         Serial.println("Collided with final wall");
-        FL_FC->serviceTime = 300;
+        FL_FC->serviceTime = 500;
         int reverseTime = 300;
         if (millis() < timeTriggered + reverseTime) {
           Serial.println("reverse");
@@ -429,12 +429,12 @@ void service_FC_FR() {
   if (millis() < timeTriggered + FC_FR->serviceTime) { // service here
     switch(MasterSequence[MasterSequenceNum]) {
       case FIND_WALL: {
-        FC_FR->serviceTime = 1000;
+        FC_FR->serviceTime = get_rotate_time(190) + 500;
         int reverseTime = 100;
         if (millis() < timeTriggered + reverseTime) {
           Serial.println("reverse");
           reverse();
-        } else if (millis() < timeTriggered + get_rotate_time(150) + reverseTime) {
+        } else if (millis() < timeTriggered + get_rotate_time(190) + reverseTime) {
           if (BotType == SCARLET_WITCH) {
             Serial.println("turnLeftInPlace");
             turnLeftInPlace();
@@ -447,12 +447,12 @@ void service_FC_FR() {
           halt();
           drive();
           MasterSequenceNum++; // finished with this service, move on to the next collision
-          delay(FC_FR->serviceTime - reverseTime + get_rotate_time(150) + 10); // delay to expire service time
+          delay(FC_FR->serviceTime - reverseTime + get_rotate_time(190) + 10); // delay to expire service time
         }
       } break;
       case FOLLOW_PATH_2: {
         Serial.println("Collided with final wall");
-        FC_FR->serviceTime = 500;
+        FC_FR->serviceTime = 800;
         int reverseTime = 500;
         if (millis() < timeTriggered + reverseTime) {
           Serial.println("reverse");
