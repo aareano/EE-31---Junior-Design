@@ -18,13 +18,13 @@ void drive() {
 }
 
 long get_drive_time(float inches) {
-  float forwardSpeed = 7.75; // in/s    // you made need to adjust this constant based on batteries and PWM speed
+  float forwardSpeed = 7.25; // in/s    // you made need to adjust this constant based on batteries and PWM speed
   float seconds = inches / forwardSpeed;
   return (long) 1000*seconds; // ms
 }
 
 long get_rotate_time(int degrees) {
-  int timePerDegree = 4.95; // ms    // you made need to adjust this constant based on batteries and PWM speed
+  float timePerDegree = 4.9; // ms    // you made need to adjust this constant based on batteries and PWM speed
   return timePerDegree * degrees;
 }
 
