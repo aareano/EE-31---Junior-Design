@@ -57,9 +57,9 @@ void follow_path() {
         //         we've just moved off the path
         PathState = RECOVERING;
         if (PathToFollow == RED) {
-          SearchSide = SEARCHING_RIGHT;
-        } else {
           SearchSide = SEARCHING_LEFT;
+        } else {
+          SearchSide = SEARCHING_RIGHT;
         }
         SearchStartTime = millis();
         SearchTime = BaseSearchTime;  // reset the search radius
