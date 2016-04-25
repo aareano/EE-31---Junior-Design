@@ -103,7 +103,7 @@ void send_message(Message message) {
       break;
     case DANCE:
       digitalWrite(alertBlue, HIGH);
-      delay(400 + offsetMs);
+      delay(300 + offsetMs);
       digitalWrite(alertBlue, LOW);
       break;
     default:
