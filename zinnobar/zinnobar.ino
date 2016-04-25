@@ -48,9 +48,9 @@ enum Side { SEARCHING_LEFT, SEARCHING_RIGHT };
 Color PathToFollow;
 Side SearchSide;
 Path PathState;
-long BaseSearchTime = 300;  // this value is later lowered to 100
-long SearchTime = 300;      // this is how long to search for the line on the left or right when we get off of it
-long MinSearchTime = 50;    // the bot needs to turn at least this much before it starts checking for the path again
+long BaseSearchTime = 175;  // this value is later lowered to 100
+long SearchTime = 175;      // this is how long to search for the line on the left or right when we get off of it
+long MinSearchTime = 0;    // the bot needs to turn at least this much before it starts checking for the path again
 long SearchStartTime = 0;   // this will be edited when we start searching for the line when we get off of it
 
 enum TurnDirection {L, R};
@@ -299,6 +299,7 @@ void setup() {
   ColorState = BLACK;
   MineState = NONE;
   halt();
+  drive();
 }
 
 // the loop routine runs over and over again forever:
@@ -376,6 +377,15 @@ void loop() {
       detect_color();
       if (ColorState == PathToFollow) {
         MasterSequenceNum++; // found the path!
+        if (PathToFollow == RED) {
+          turnRightInPlace();
+          drive();
+          delay(500);
+        } else {
+          turnLeftInPlace();
+          drive();
+          delay(500);
+        }
       }
       poll_bumpers();
       service_collisions();
@@ -429,6 +439,7 @@ void loop() {
     case FINAL_COLLISION:           // blinks led
       send_message(PATH_END);
       send_message(PATH_END);
+      delay(3000);
       MasterSequenceNum++;
       break;
     case FINAL_WAIT:                // waits for 400 hz from other bot
@@ -464,6 +475,7 @@ void loop() {
     } break;
                                               // challenge 2 --------------------------------
     case NOTIFY: {
+      Serial.println("NOTIFY");
       halt();
       drive();
       send_message(DANCE);
@@ -471,6 +483,7 @@ void loop() {
       MasterSequenceNum++;
     } break;
     case WAIT: {
+      Serial.println("WAIT");
       halt();
       drive();
       if (CommsState == COMMS_LISTENING) {
@@ -479,56 +492,65 @@ void loop() {
       if (CommsState == COMMS_RECEIVING) {
         receive_message();
       }
-    }
+    } break;
     case HALT: {
+      Serial.println("HALT");
       halt();
       drive();
       delay(2000);
       MasterSequenceNum++;
     } break;
     case FORWARD_12: {
+      Serial.println("FORWARD_12");
       forward();
       drive();
       delay(get_drive_time(12));  // get_drive_time is in motion.ino
       MasterSequenceNum++;
     } break;
     case ROTATE_RIGHT_180: {
+      Serial.println("ROTATE_RIGHT_180");
       turnRightInPlace();
       drive();
       delay(get_rotate_time(180)); // in motion.ino
       MasterSequenceNum++;
     } break;
     case BACK_3: {
+      Serial.println("BACK_3");
       reverse();      // reverse() needs to be the same speed as forward()
       drive();
       delay(get_drive_time(3));
       MasterSequenceNum++;
     } break;
     case BACK_15: {
+      Serial.println("BACK_15");
       reverse();
       drive();
       delay(get_drive_time(15));
       MasterSequenceNum++;
     } break;
     case TURN_LEFT: {
+      Serial.println("TURN_LEFT");
       turnLeftInPlace();
       drive();
       delay(get_rotate_time(90)); // 90 degree turn
       MasterSequenceNum++;
     } break;
     case TURN_RIGHT_1: {
+      Serial.println("TURN_RIGHT_1");
       turnRightInPlace();
       drive();
       delay(get_rotate_time(90));
       MasterSequenceNum++;
     } break;
     case TURN_RIGHT_2: {
+      Serial.println("TURN_RIGHT_2");
       turnRightInPlace();
       drive();
       delay(get_rotate_time(90));
       MasterSequenceNum++;
     } break;
     case TURN_RIGHT_3: {
+      Serial.println("TURN_RIGHT_3");
       turnRightInPlace();
       drive();
       delay(get_rotate_time(90));
