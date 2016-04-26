@@ -396,7 +396,7 @@ void service_FL_FC() {
         }
       } break;
       case FOLLOW_PATH_2: {
-        Serial.println("Collided with final wall");
+        Serial.println("Collided with final wall FL_FC");
         FL_FC->serviceTime = 500;
         int reverseTime = 300;
         if (millis() < timeTriggered + reverseTime) {
