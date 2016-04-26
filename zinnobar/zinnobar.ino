@@ -340,11 +340,13 @@ void loop() {
         case MASTER_DANCER:
           MasterSequence = MasterDanceSequence;
           MasterSequenceNum = 0;
+          PathToFollow = BLUE;
           flash_led(alertYellow, 100);
           break;
         case SLAVE_DANCER:
           MasterSequence = SlaveDanceSequence;
           MasterSequenceNum = 0;
+          PathToFollow = BLUE;
           flash_led(alertRed, 50);
           flash_led(alertYellow, 50);
           flash_led(alertBlue, 50);
@@ -437,6 +439,7 @@ void loop() {
       drive();
       break;
     case FINAL_COLLISION:           // blinks led
+      Serial.println("FINAL_COLLISION");
       send_message(PATH_END);
       send_message(PATH_END);
       delay(3000);
@@ -497,13 +500,14 @@ void loop() {
       Serial.println("HALT");
       halt();
       drive();
-      delay(2000);
+      delay(500);
       MasterSequenceNum++;
     } break;
     case FORWARD_12: {
       Serial.println("FORWARD_12");
       forward();
       drive();
+      Serial.println(get_drive_time(12));
       delay(get_drive_time(12));  // get_drive_time is in motion.ino
       MasterSequenceNum++;
     } break;
