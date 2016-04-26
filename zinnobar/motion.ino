@@ -18,13 +18,23 @@ void drive() {
 }
 
 long get_drive_time(float inches) {
-  float forwardSpeed = 7.25; // in/s    // you made need to adjust this constant based on batteries and PWM speed
+  float forwardSpeed = 0; // in/s   // you made need to adjust this constant based on batteries and PWM speed
+  if (BotType == SCARLET_WITCH || BotType == NIGHTWING || BotType == TEST_BOT) {
+    forwardSpeed = 7.25;
+  } else { // BotType == MASTER_DANCER || BotType == SLAVE_DANCER
+    forwardSpeed = 7.25;
+  }
   float seconds = inches / forwardSpeed;
   return (long) 1000*seconds; // ms
 }
 
 long get_rotate_time(int degrees) {
-  float timePerDegree = 5.3; // ms    // you made need to adjust this constant based on batteries and PWM speed
+  float timePerDegree = 0; // ms    // you made need to adjust this constant based on batteries and PWM speed
+  if (BotType == SCARLET_WITCH || BotType == NIGHTWING || BotType == TEST_BOT) {
+    timePerDegree = 5.3;
+  } else { // BotType == MASTER_DANCER || BotType == SLAVE_DANCER
+    timePerDegree = 6.7;
+  }
   return timePerDegree * degrees;
 }
 
@@ -86,10 +96,10 @@ void turnMotor(MotorName mName, int highPin, int lowPin, float dutyCycle) {
   int lowPWM = 0;
   
   if (mName == RIGHT) {
-    int offset = PathToFollow == RED ? (dutyCycle == 0 ? 0 : 2) : 0;
+    int offset = PathToFollow == RED ? (dutyCycle == 0 ? 0 : 0) : 0;
     highPWM = calcPWM(roundPWM(dutyCycle + offset, 15, 85));
   } else {
-    int offset = PathToFollow == RED ? 0 : (dutyCycle == 0 ? 0 : 4);
+    int offset = PathToFollow == RED ? 0 : (dutyCycle == 0 ? 0 : 2);
     highPWM = calcPWM(roundPWM(dutyCycle + offset, 15, 85));
   }
 
