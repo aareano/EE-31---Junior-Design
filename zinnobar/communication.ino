@@ -35,9 +35,6 @@ void receive_message() {
         case LISTENING_MINE_SCARLET_WITCH:
           MasterSequenceNum++;
           break;
-        case WAIT:
-          MasterSequenceNum++;
-          break;
     }
     
   } else if (pulseCount >= 26 && pulseCount <= 34) {
@@ -49,6 +46,9 @@ void receive_message() {
           MasterSequenceNum++;   // progress to the next state in the sequence
           break;
         case FINAL_WAIT:
+          MasterSequenceNum++;
+          break;
+        case WAIT:
           MasterSequenceNum++;
           break;
     }
@@ -92,6 +92,7 @@ void send_message(Message message) {
       digitalWrite(alertYellow, LOW);
       break;
     case PATH_END:
+      Serial.println("PATH_END");
       digitalWrite(alertRed, HIGH);
       delay(300 + offsetMs);
       digitalWrite(alertRed, LOW);
@@ -102,9 +103,9 @@ void send_message(Message message) {
       digitalWrite(alertBlue, LOW);
       break;
     case DANCE:
-      digitalWrite(alertBlue, HIGH);
+      digitalWrite(alertYellow, HIGH);
       delay(300 + offsetMs);
-      digitalWrite(alertBlue, LOW);
+      digitalWrite(alertYellow, LOW);
       break;
     default:
       Serial.println("*** Trying to send an unknown message in sendMessageToCommandCenter() ***");
